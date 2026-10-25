@@ -167,7 +167,7 @@ dotnet format csFastFloat.sln
 dotnet format csFastFloat.sln --verify-no-changes
 ```
 
-CI checks formatting and runs strict-parser tests on x64 and ARM64 with hardware
+CI checks formatting and runs strict and regular scanner tests on x64 and ARM64 with hardware
 intrinsics both enabled and disabled. Run the end-to-end and digit-run benchmarks
 (including scalar, four-digit, and eight-digit accumulation) with:
 
@@ -207,3 +207,44 @@ handling for short inputs. Four-digit parsing remains available to the benchmark
 and the portable eight-digit fallback, without adding a four-digit fast path to
 the strict scanner. Results are from a shared x64 environment; ARM performance
 still needs measurement on ARM hardware.
+
+## Regular scanner integer-run optimization
+
+The regular UTF-16 and UTF-8 scanners process ungrouped integer runs in eight-digit
+chunks, then finish with a scalar tail. UTF-16 uses the existing SIMD/portable
+helper; UTF-8 uses the existing portable eight-digit machinery. The fast path
+counts digits by pointer difference and avoids group-separator checks per digit.
+Short inputs and inputs with grouping enabled retain the scalar path. Prefix
+consumption, configurable separators, overflow correction, and rounding retain
+their existing behavior. This shared scanner serves both float and double APIs.
+
+The dedicated benchmark covers short integers, chunk boundaries, long integers,
+grouping, fractions, exponents, and trailing text in all four API paths:
+
+```sh
+dotnet run -c Release --project Benchmark -- --filter '*RegularScannerBenchmark*' --job short --warmupCount 3 --iterationCount 5 --iterationTime 100 --launchCount 1
+```
+
+Before/after means on AMD EPYC 9V74, Debian 13, .NET 9.0.21, using the same harness
+and the scanner from commit `7482f3a` as the baseline:
+
+| API | Input | Before | After |
+| --- | --- | ---: | ---: |
+| DoubleUtf16 | `1` | 15.93 ns | 15.94 ns |
+| DoubleUtf16 | `123` | 17.01 ns | 16.83 ns |
+| DoubleUtf16 | `1234567890123456` | 19.57 ns | 17.91 ns |
+| FloatUtf16 | `1234567890123456` | 19.16 ns | 16.05 ns |
+| FloatUtf8 | `1234567890123456` | 18.32 ns | 16.09 ns |
+| DoubleUtf16 | `123456789012345678901234567890` | 50.94 ns | 41.77 ns |
+| FloatUtf16 | `123456789012345678901234567890` | 46.07 ns | 35.45 ns |
+| FloatUtf8 | `123456789012345678901234567890` | 44.18 ns | 37.52 ns |
+| FloatUtf8 | `123` | 7.39 ns | 8.31 ns |
+| FloatUtf16 | `1.2345678901234567e-100` | 16.19 ns | 17.66 ns |
+
+These short shared-machine measurements show gains on longer integer runs and
+small fixed overhead on some short/scientific inputs (around 0–1.5 ns here).
+All measured paths allocate zero bytes. The optimization applies when grouping
+is disabled; grouping retains its existing scalar implementation.
+
+A repeat of the UTF-8 double benchmarks resolved a high-variance eight-digit
+measurement: `12345678` measured 16.03 ns, compared with 17.09 ns before.

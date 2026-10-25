@@ -45,25 +45,45 @@ namespace csFastFloat.Structures
       ulong i = 0; // an unsigned int avoids signed overflows (which are bad)
       long integerDigitCount = 0;
 
-      while (p != pend)
+      // Keep short and grouped inputs on the existing scalar path. In the
+      // ungrouped path, pointer subtraction counts digits without a per-digit
+      // counter or group-separator checks.
+      if (!allowThousands && pend - p >= 8)
       {
-        if (Utils.is_integer(*p, out uint cMinus0))
+        while (pend - p >= 8 && Utils.TryParseEightConsecutiveDigits(p, out uint chunk))
         {
-          // a multiplication by 10 is cheaper than an arbitrary integer
-          // multiplication
-          i = 10 * i + (ulong)cMinus0; // might overflow, we will handle the overflow later
+          i = i * 100000000 + chunk;
+          p += 8;
+        }
+        while (p != pend && Utils.is_integer(*p, out uint digit))
+        {
+          i = i * 10 + digit;
           ++p;
-          ++integerDigitCount;
         }
-        else if (allowThousands && *p == thousandsSeparator
-                 && integerDigitCount > 0
-                 && (p + 1) != pend && Utils.is_integer(*(p + 1), out uint _))
+        integerDigitCount = p - startDigits;
+      }
+      else
+      {
+        while (p != pend)
         {
-          ++p; // skip a thousands separator that lies strictly between digits
-        }
-        else
-        {
-          break;
+          if (Utils.is_integer(*p, out uint cMinus0))
+          {
+            // a multiplication by 10 is cheaper than an arbitrary integer
+            // multiplication
+            i = 10 * i + (ulong)cMinus0; // might overflow, we will handle the overflow later
+            ++p;
+            ++integerDigitCount;
+          }
+          else if (allowThousands && *p == thousandsSeparator
+                   && integerDigitCount > 0
+                   && (p + 1) != pend && Utils.is_integer(*(p + 1), out uint _))
+          {
+            ++p; // skip a thousands separator that lies strictly between digits
+          }
+          else
+          {
+            break;
+          }
         }
       }
       char* endOfIntegerPart = p;
@@ -241,25 +261,45 @@ namespace csFastFloat.Structures
       ulong i = 0; // an unsigned int avoids signed overflows (which are bad)
       long integerDigitCount = 0;
 
-      while (p != pend)
+      // Keep short and grouped inputs on the existing scalar path. In the
+      // ungrouped path, pointer subtraction counts digits without a per-digit
+      // counter or group-separator checks.
+      if (!allowThousands && pend - p >= 8)
       {
-        if (Utils.is_integer(*p, out uint digit))
+        while (pend - p >= 8 && Utils.is_made_of_eight_digits_fast(p))
         {
-          // a multiplication by 10 is cheaper than an arbitrary integer
-          // multiplication
-          i = 10 * i + digit; // might overflow, we will handle the overflow later
+          i = i * 100000000 + Utils.parse_eight_digits_unrolled(p);
+          p += 8;
+        }
+        while (p != pend && Utils.is_integer(*p, out uint digit))
+        {
+          i = i * 10 + digit;
           ++p;
-          ++integerDigitCount;
         }
-        else if (allowThousands && *p == thousandsSeparator
-                 && integerDigitCount > 0
-                 && (p + 1) != pend && Utils.is_integer(*(p + 1), out uint _))
+        integerDigitCount = p - startDigits;
+      }
+      else
+      {
+        while (p != pend)
         {
-          ++p; // skip a thousands separator that lies strictly between digits
-        }
-        else
-        {
-          break;
+          if (Utils.is_integer(*p, out uint digit))
+          {
+            // a multiplication by 10 is cheaper than an arbitrary integer
+            // multiplication
+            i = 10 * i + digit; // might overflow, we will handle the overflow later
+            ++p;
+            ++integerDigitCount;
+          }
+          else if (allowThousands && *p == thousandsSeparator
+                   && integerDigitCount > 0
+                   && (p + 1) != pend && Utils.is_integer(*(p + 1), out uint _))
+          {
+            ++p; // skip a thousands separator that lies strictly between digits
+          }
+          else
+          {
+            break;
+          }
         }
       }
       byte* endOfIntegerPart = p;

@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("TestcsFastFloat")]
 
@@ -6,13 +6,13 @@ namespace csFastFloat.Structures
 {
   internal struct value128
   {
-    public ulong low;
-    public ulong high;
+    public ulong Low;
+    public ulong High;
 
     public value128(ulong h, ulong l) : this()
     {
-      high = h;
-      low = l;
+      High = h;
+      Low = l;
     }
   }
 }

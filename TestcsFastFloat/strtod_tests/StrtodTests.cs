@@ -1,4 +1,4 @@
-﻿using ApprovalTests.Namers;
+using ApprovalTests.Namers;
 using csFastFloat;
 using System;
 using System.IO;
@@ -10,7 +10,7 @@ namespace TestcsFastFloat.suppl_tests
 {
 
 
-  public class Strtod_tests : BaseTestClass
+  public class StrtodTests : BaseTestClass
   {
 
 #if NET8_0
@@ -29,7 +29,7 @@ namespace TestcsFastFloat.suppl_tests
     /// https://github.com/ahrvoje/numerics/blob/master/strtod/strtod_tests.toml
     /// </summary>
     [SkippableFact]
-    void strtod_tests_file()
+    void StrtodTestsFile()
     {
       Skip.If(base.NoDiffToolDetected(), "No diff tool detected");
 
@@ -71,22 +71,22 @@ namespace TestcsFastFloat.suppl_tests
             var sut = curntLine.Split('=')[1].Replace("\"", "").Trim();
 
 
-            if (!double.TryParse(sut, out double _db_val))
+            if (!double.TryParse(sut, out double dbVal))
             {
               sb.AppendLine("d   = *** can't parse *** ");
             }
             else
             {
-              sb.AppendLine($"d   = {_db_val}");
+              sb.AppendLine($"d   = {dbVal}");
             }
 
-            if (!FastDoubleParser.TryParseDouble(sut, out double _ff_val))
+            if (!FastDoubleParser.TryParseDouble(sut, out double ffVal))
             {
               sb.AppendLine("ff   = *** can't parse *** ");
             }
             else
             {
-              sb.AppendLine($"ff  = {_ff_val}");
+              sb.AppendLine($"ff  = {ffVal}");
             }
 
 

@@ -29,7 +29,7 @@ namespace TestcsFastFloat.Tests.Basic
     [Trait("Category", "Smoke Test")]
     [Theory]
     [MemberData(nameof(NonDecimalsData))]
-    unsafe public void FastFloatParser_HandleInvalidInput_works(string input, float sut)
+    unsafe public void FastFloatParserHandleInvalidInputWorks(string input, float sut)
     {
       fixed (char* p = input)
       {
@@ -41,7 +41,7 @@ namespace TestcsFastFloat.Tests.Basic
     [Trait("Category", "Smoke Test")]
     [Theory]
     [MemberData(nameof(NonDecimalsData))]
-    public unsafe void FloatParser_NonDecimals_String(string input, float expected)
+    public unsafe void FloatParserNonDecimalsString(string input, float expected)
     {
       var actual = FastFloatParser.ParseFloat(input);
       Assert.Equal(expected, actual);
@@ -50,7 +50,7 @@ namespace TestcsFastFloat.Tests.Basic
     [Trait("Category", "Smoke Test")]
     [Theory]
     [MemberData(nameof(NonDecimalsData))]
-    public unsafe void FloatParser_NonDecimals_Span(string input, float expected)
+    public unsafe void FloatParserNonDecimalsSpan(string input, float expected)
     {
       var actual = FastFloatParser.ParseFloat(input.AsSpan());
       Assert.Equal(expected, actual);
@@ -62,7 +62,7 @@ namespace TestcsFastFloat.Tests.Basic
     [InlineData(null)]
     [InlineData("-")]
     [InlineData("1ee10")]
-    public void TryParse_NeverThrows(string sut)
+    public void TryParseNeverThrows(string sut)
     {
 
       Assert.False(FastFloatParser.TryParseFloat(sut, out _));
@@ -80,7 +80,7 @@ namespace TestcsFastFloat.Tests.Basic
 
     [Trait("Category", "Smoke Test")]
     [Fact]
-    public void cas_compute_float_32_1()
+    public void CasComputeFloat321()
     {
       for (int p = -65; p <= 38; p++)
       {
@@ -96,14 +96,14 @@ namespace TestcsFastFloat.Tests.Basic
         if (!f.HasValue)
           throw new ApplicationException($"Can't parse p=> {p}");
 
-        if (f != testing_power_of_ten_float[p + 65])
+        if (f != s_testingPowerOfTenFloat[p + 65])
           throw new ApplicationException($"bad parsing p=> {p}");
       }
     }
 
     [Trait("Category", "Smoke Test")]
     [Fact]
-    unsafe public void cas_compute_float_32_2()
+    unsafe public void CasComputeFloat322()
     {
       for (int p = -1000; p <= 38; p++)
       {
@@ -117,14 +117,14 @@ namespace TestcsFastFloat.Tests.Basic
             throw new ApplicationException($"Can't parse p=> 1e{p}");
           }
 
-          float expected = ((p >= -65) ? testing_power_of_ten_float[p + 65] : (float)Math.Pow(10, p));
+          float expected = ((p >= -65) ? s_testingPowerOfTenFloat[p + 65] : (float)Math.Pow(10, p));
           Assert.Equal(expected, f.Value);
         }
       }
     }
 
     [SkippableFact]
-    unsafe public void ParseNumberString_Works_Scnenarios()
+    unsafe public void ParseNumberStringWorksScnenarios()
     {
       Skip.If(base.NoDiffToolDetected(), "No diff tool detected");
 
@@ -165,7 +165,7 @@ namespace TestcsFastFloat.Tests.Basic
           char* pend = p + kv.Value.Length;
           var res = ParsedNumberString.ParseNumberString(p, pend);
 
-          sb.AppendLine($"Resultat : {res.exponent} {res.mantissa} {res.negative} {res.valid}");
+          sb.AppendLine($"Resultat : {res.Exponent} {res.Mantissa} {res.Negative} {res.Valid}");
           sb.AppendLine();
         }
       }
@@ -183,21 +183,21 @@ namespace TestcsFastFloat.Tests.Basic
     }
 
     [Fact]
-    unsafe public void PaseFloat_Throws_When_NULL() => Assert.Throws<System.ArgumentNullException>(() => FastFloatParser.ParseFloat((string)null));
+    unsafe public void PaseFloatThrowsWhenNULL() => Assert.Throws<System.ArgumentNullException>(() => FastFloatParser.ParseFloat((string)null));
 
     [Fact]
-    unsafe public void PaseFloat_Throws_When_Empty() => Assert.Throws<System.ArgumentException>(() => FastFloatParser.ParseFloat(string.Empty));
+    unsafe public void PaseFloatThrowsWhenEmpty() => Assert.Throws<System.ArgumentException>(() => FastFloatParser.ParseFloat(string.Empty));
 
     [Theory]
     [InlineData("some alpha")]
     [InlineData("-")]
     [InlineData("1ee10")]
-    unsafe public void PaseFloat_Throws_When_Invalid(string sut) => Assert.Throws<System.ArgumentException>(() => FastFloatParser.ParseFloat(sut));
+    unsafe public void PaseFloatThrowsWhenInvalid(string sut) => Assert.Throws<System.ArgumentException>(() => FastFloatParser.ParseFloat(sut));
 
 
 
     [SkippableFact]
-    unsafe public void ParseNumber_Works_Scenarios()
+    unsafe public void ParseNumberWorksScenarios()
     {
       Skip.If(base.NoDiffToolDetected(), "No diff tool detected");
 
@@ -266,7 +266,7 @@ namespace TestcsFastFloat.Tests.Basic
     [InlineData("   -1.5", 7)]
     [InlineData(" \t 2.5e3 trailing", 8)]
     [InlineData("1.5", 3)]
-    public void TryParseFloat_String_CharsConsumed_IncludesLeadingWhitespace(string input, int expectedConsumed)
+    public void TryParseFloatStringCharsConsumedIncludesLeadingWhitespace(string input, int expectedConsumed)
     {
       Assert.True(FastFloatParser.TryParseFloat(input, out int consumed, out float _));
       Assert.Equal(expectedConsumed, consumed);
@@ -276,7 +276,7 @@ namespace TestcsFastFloat.Tests.Basic
     [InlineData("  1", 3)]
     [InlineData("   -1.5", 7)]
     [InlineData(" \t 2.5e3 trailing", 8)]
-    public unsafe void TryParseFloat_CharPointer_CharsConsumed_IncludesLeadingWhitespace(string input, int expectedConsumed)
+    public unsafe void TryParseFloatCharPointerCharsConsumedIncludesLeadingWhitespace(string input, int expectedConsumed)
     {
       fixed (char* p = input)
       {
@@ -289,7 +289,7 @@ namespace TestcsFastFloat.Tests.Basic
     [InlineData("  1", 3)]
     [InlineData("   -1.5", 7)]
     [InlineData(" \t 2.5e3 trailing", 8)]
-    public unsafe void TryParseFloat_BytePointer_CharsConsumed_IncludesLeadingWhitespace(string input, int expectedConsumed)
+    public unsafe void TryParseFloatBytePointerCharsConsumedIncludesLeadingWhitespace(string input, int expectedConsumed)
     {
       byte[] bytes = Encoding.ASCII.GetBytes(input);
       fixed (byte* p = bytes)
@@ -300,7 +300,7 @@ namespace TestcsFastFloat.Tests.Basic
     }
 
     [Fact]
-    public void TryParseFloat_ConsumedCount_AdvancesPastWholeInput()
+    public void TryParseFloatConsumedCountAdvancesPastWholeInput()
     {
       // Walking the whole string using consumed count should land exactly at the end.
       string sut = "  1.5 -2.25e1 7";
@@ -322,7 +322,7 @@ namespace TestcsFastFloat.Tests.Basic
     [InlineData("1,234", 1234f)]
     [InlineData("12,345.5", 12345.5f)]
     [InlineData("-1,234.5", -1234.5f)]
-    public void ParseFloat_AllowThousands_MatchesBcl(string input, float expected)
+    public void ParseFloatAllowThousandsMatchesBcl(string input, float expected)
     {
       var styles = NumberStyles.Float | NumberStyles.AllowThousands;
       var bcl = float.Parse(input, styles, CultureInfo.InvariantCulture);
@@ -333,7 +333,7 @@ namespace TestcsFastFloat.Tests.Basic
     }
 
     [Fact]
-    public void ParseFloat_AllowThousands_FromPR110()
+    public void ParseFloatAllowThousandsFromPR110()
     {
       // The exact case from PR #110.
       var styles = NumberStyles.Float | NumberStyles.AllowThousands;
@@ -343,7 +343,7 @@ namespace TestcsFastFloat.Tests.Basic
     }
 
     [Fact]
-    public void ParseFloat_NoAllowThousands_StopsAtSeparator()
+    public void ParseFloatNoAllowThousandsStopsAtSeparator()
     {
       // Without AllowThousands, the comma is not part of the number — parsing stops at it.
       Assert.True(FastFloatParser.TryParseFloat("1,234.5", out int consumed, out float result));
@@ -352,16 +352,16 @@ namespace TestcsFastFloat.Tests.Basic
     }
 
     [Fact]
-    public void ParseFloat_AllowThousands_CustomSeparator()
+    public void ParseFloatAllowThousandsCustomSeparator()
     {
       // European convention: '.' as thousands, ',' as decimal.
       var styles = NumberStyles.Float | NumberStyles.AllowThousands;
-      var ff = FastFloatParser.ParseFloat("1.234.567,89", styles, decimal_separator: ',', thousands_separator: '.');
+      var ff = FastFloatParser.ParseFloat("1.234.567,89", styles, decimalSeparator: ',', thousandsSeparator: '.');
       Assert.Equal(1234567.89f, ff);
     }
 
     [Fact]
-    public void ParseFloat_AllowThousands_RejectsLeadingSeparator()
+    public void ParseFloatAllowThousandsRejectsLeadingSeparator()
     {
       // BCL rejects a leading comma even with AllowThousands; we should too.
       var styles = NumberStyles.Float | NumberStyles.AllowThousands;
@@ -370,7 +370,7 @@ namespace TestcsFastFloat.Tests.Basic
     }
 
     [Fact]
-    public void ParseFloat_AllowThousands_RequiresSeparatorBetweenDigits()
+    public void ParseFloatAllowThousandsRequiresSeparatorBetweenDigits()
     {
       // We require thousands separators to lie strictly between digits; "1,,234" stops
       // parsing at the first comma (since the next char is not a digit), so we consume
@@ -381,7 +381,7 @@ namespace TestcsFastFloat.Tests.Basic
       Assert.Equal(1, consumed);
     }
 
-    private static float[] testing_power_of_ten_float =  {
+    private static float[] s_testingPowerOfTenFloat =  {
     1e-65F,
     1e-64F,  1e-63F,  1e-62F,  1e-61F,  1e-60F,  1e-59F,  1e-58F,  1e-57F,  1e-56F,
     1e-55F,  1e-54F,  1e-53F,  1e-52F,  1e-51F,  1e-50F,  1e-49F,  1e-48F,  1e-47F,

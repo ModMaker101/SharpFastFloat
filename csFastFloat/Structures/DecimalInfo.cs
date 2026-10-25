@@ -1,4 +1,4 @@
-﻿using csFastFloat.Constants;
+using csFastFloat.Constants;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -10,11 +10,11 @@ namespace csFastFloat.Structures
 {
   internal struct DecimalInfo
   {
-    internal uint num_digits;
-    internal int decimal_point;
-    internal bool negative;
-    internal bool truncated;
-    internal DigitsBuffer digits;
+    internal uint NumDigits;
+    internal int DecimalPoint;
+    internal bool Negative;
+    internal bool Truncated;
+    internal DigitsBuffer Digits;
 
     [ExcludeFromCodeCoverage]
     public override string ToString()
@@ -23,35 +23,35 @@ namespace csFastFloat.Structures
 
       sb.Append("0.");
 
-      for (int i = 0; i < num_digits; i++)
+      for (int i = 0; i < NumDigits; i++)
       {
-        sb.Append(digits[i]);
+        sb.Append(Digits[i]);
       }
 
-      sb.Append($" * 10 ** {decimal_point} "); ;
+      sb.Append($" * 10 ** {DecimalPoint} "); ;
       return sb.ToString();
     }
 
-    internal void trim()
+    internal void Trim()
     {
-      while ((num_digits > 0) && (digits[num_digits - 1] == 0))
+      while ((NumDigits > 0) && (Digits[NumDigits - 1] == 0))
       {
-        num_digits--;
+        NumDigits--;
       }
     }
 
-    private static ushort get_number_of_digits_decimal_left_shift(int shift)
+    private static ushort GetNumberOfDigitsDecimalLeftShift(int shift)
     {
 #if NET5_0_OR_GREATER
-      Debug.Assert(shift < number_of_digits_decimal_left_shift_table.Length);
-      ref ushort tableRef = ref MemoryMarshal.GetArrayDataReference(number_of_digits_decimal_left_shift_table);
+      Debug.Assert(shift < s_numberOfDigitsDecimalLeftShiftTable.Length);
+      ref ushort tableRef = ref MemoryMarshal.GetArrayDataReference(s_numberOfDigitsDecimalLeftShiftTable);
       return Unsafe.Add(ref tableRef, (IntPtr)(uint)shift);
 #else
-      return number_of_digits_decimal_left_shift_table[shift];
+      return s_numberOfDigitsDecimalLeftShiftTable[shift];
 #endif
     }
 
-    private static readonly ushort[] number_of_digits_decimal_left_shift_table = {
+    private static readonly ushort[] s_numberOfDigitsDecimalLeftShiftTable = {
         0x0000, 0x0800, 0x0801, 0x0803, 0x1006, 0x1009, 0x100D, 0x1812, 0x1817,
         0x181D, 0x2024, 0x202B, 0x2033, 0x203C, 0x2846, 0x2850, 0x285B, 0x3067,
         0x3073, 0x3080, 0x388E, 0x389C, 0x38AB, 0x38BB, 0x40CC, 0x40DD, 0x40EF,
@@ -62,7 +62,7 @@ namespace csFastFloat.Structures
         0x051C, 0x051C
     };
 
-    private static byte number_of_digits_decimal_left_shift_table_powers_of_5(int index)
+    private static byte NumberOfDigitsDecimalLeftShiftTablePowersOf5(int index)
     {
       Debug.Assert(index < number_of_digits_decimal_left_shift_table_powers_of_5_table.Length);
       ref byte tableRef = ref MemoryMarshal.GetReference(number_of_digits_decimal_left_shift_table_powers_of_5_table);
@@ -128,68 +128,68 @@ namespace csFastFloat.Structures
     };
 
 
-    private uint number_of_digits_decimal_left_shift(int shift)
+    private uint NumberOfDigitsDecimalLeftShift(int shift)
     {
       shift &= 63;
-      uint x_a = get_number_of_digits_decimal_left_shift(shift);
-      uint x_b = get_number_of_digits_decimal_left_shift(shift + 1);
-      uint num_new_digits = x_a >> 11;
-      uint pow5_a = 0x7FF & x_a;
-      uint pow5_b = 0x7FF & x_b;
+      uint xa = GetNumberOfDigitsDecimalLeftShift(shift);
+      uint xb = GetNumberOfDigitsDecimalLeftShift(shift + 1);
+      uint numNewDigits = xa >> 11;
+      uint pow5A = 0x7FF & xa;
+      uint pow5B = 0x7FF & xb;
 
       // byte* pow5 = (byte*)number_of_digits_decimal_left_shift_table_powers_of_5[pow5_a];
       int i = 0;
-      uint n = pow5_b - pow5_a;
+      uint n = pow5B - pow5A;
       for (; i < n; i++)
       {
-        if (i >= num_digits)
+        if (i >= NumDigits)
         {
-          return num_new_digits - 1;
+          return numNewDigits - 1;
         }
-        else if (digits[i] == number_of_digits_decimal_left_shift_table_powers_of_5((int)(pow5_a + i)))
+        else if (Digits[i] == NumberOfDigitsDecimalLeftShiftTablePowersOf5((int)(pow5A + i)))
         {
           continue;
         }
-        else if (digits[i] < number_of_digits_decimal_left_shift_table_powers_of_5((int)(pow5_a + i)))
+        else if (Digits[i] < NumberOfDigitsDecimalLeftShiftTablePowersOf5((int)(pow5A + i)))
         {
-          return num_new_digits - 1;
+          return numNewDigits - 1;
         }
         else
         {
-          return num_new_digits;
+          return numNewDigits;
         }
       }
-      return num_new_digits;
+      return numNewDigits;
     }
 
-    internal ulong round()
+    internal ulong Round()
     {
-      if ((num_digits == 0) || (decimal_point < 0))
+      if ((NumDigits == 0) || (DecimalPoint < 0))
       {
         return 0;
       }
-      else if (decimal_point > 18)
+      else if (DecimalPoint > 18)
       {
         return ulong.MaxValue;
       }
       // at this point, we know that decimal_point >= 0
-      uint dp = (uint)decimal_point;
+      uint dp = (uint)DecimalPoint;
       ulong n = 0;
       for (uint i = 0; i < dp; i++)
       {
-        n = (10 * n) + (ulong)((i < num_digits) ? digits[i] : 0);
+        n = (10 * n) + (ulong)((i < NumDigits) ? Digits[i] : 0);
       }
-      bool round_up = false;
-      if (dp < num_digits)
+      bool roundUp = false;
+      if (dp < NumDigits)
       {
-        round_up = digits[dp] >= 5; // normally, we round up
-                                    // but we may need to round to even!
-        if ((digits[dp] == 5) && (dp + 1 == num_digits))
+        roundUp = Digits[dp] >= 5; // normally, we round up
+                                   // but we may need to round to even!
+        if ((Digits[dp] == 5) && (dp + 1 == NumDigits))
         {
-          round_up = truncated || ((dp > 0) && digits[dp - 1] % 2 != 0);
+          roundUp = Truncated || ((dp > 0) && Digits[dp - 1] % 2 != 0);
         }
       }
-      if (round_up)
+      if (roundUp)
       {
         n++;
       }
@@ -197,72 +197,72 @@ namespace csFastFloat.Structures
     }
 
     // computes h * 2^-shift
-    internal void decimal_left_shift(int shift)
+    internal void DecimalLeftShift(int shift)
     {
-      if (num_digits == 0)
+      if (NumDigits == 0)
       {
         return;
       }
-      uint num_new_digits = number_of_digits_decimal_left_shift(shift);
+      uint numNewDigits = NumberOfDigitsDecimalLeftShift(shift);
 
-      int read_index = (int)(num_digits - 1);
-      uint write_index = num_digits - 1 + num_new_digits;
+      int readIndex = (int)(NumDigits - 1);
+      uint writeIndex = NumDigits - 1 + numNewDigits;
       ulong n = 0;
 
-      while (read_index >= 0)
+      while (readIndex >= 0)
       {
-        n += (ulong)(digits[read_index]) << shift;
+        n += (ulong)(Digits[readIndex]) << shift;
         ulong quotient = n / 10;
         ulong remainder = n - (10 * quotient);
-        if (write_index < CalculationConstants.max_digits)
+        if (writeIndex < CalculationConstants.MaxDigits)
         {
-          digits[write_index] = (byte)(remainder);
+          Digits[writeIndex] = (byte)(remainder);
         }
         else if (remainder > 0)
         {
-          truncated = true;
+          Truncated = true;
         }
         n = quotient;
-        write_index--;
-        read_index--;
+        writeIndex--;
+        readIndex--;
       }
       while (n > 0)
       {
         ulong quotient = n / 10;
         ulong remainder = n - (10 * quotient);
-        if (write_index < CalculationConstants.max_digits)
+        if (writeIndex < CalculationConstants.MaxDigits)
         {
-          digits[write_index] = (byte)(remainder);
+          Digits[writeIndex] = (byte)(remainder);
         }
         else if (remainder > 0)
         {
-          truncated = true;
+          Truncated = true;
         }
         n = quotient;
-        write_index--;
+        writeIndex--;
       }
-      num_digits += num_new_digits;
-      if (num_digits > CalculationConstants.max_digits)
+      NumDigits += numNewDigits;
+      if (NumDigits > CalculationConstants.MaxDigits)
       {
-        num_digits = CalculationConstants.max_digits;
+        NumDigits = CalculationConstants.MaxDigits;
       }
-      decimal_point += (int)(num_new_digits);
-      trim();
+      DecimalPoint += (int)(numNewDigits);
+      Trim();
     }
 
     // computes h * 2^shift
-    internal void decimal_right_shift(int shift)
+    internal void DecimalRightShift(int shift)
     {
-      uint read_index = 0;
-      uint write_index = 0;
+      uint readIndex = 0;
+      uint writeIndex = 0;
 
       ulong n = 0;
 
       while ((n >> shift) == 0)
       {
-        if (read_index < num_digits)
+        if (readIndex < NumDigits)
         {
-          n = (10 * n) + digits[read_index++];
+          n = (10 * n) + Digits[readIndex++];
         }
         else if (n == 0)
         {
@@ -273,48 +273,48 @@ namespace csFastFloat.Structures
           while ((n >> shift) == 0)
           {
             n = 10 * n;
-            read_index++;
+            readIndex++;
           }
           break;
         }
       }
-      decimal_point -= (int)(read_index - 1);
-      if (decimal_point < -CalculationConstants.decimal_point_range)
+      DecimalPoint -= (int)(readIndex - 1);
+      if (DecimalPoint < -CalculationConstants.DecimalPointRange)
       { // it is zero
-        num_digits = 0;
-        decimal_point = 0;
-        negative = false;
-        truncated = false;
+        NumDigits = 0;
+        DecimalPoint = 0;
+        Negative = false;
+        Truncated = false;
         return;
       }
       ulong mask = ((ulong)(1) << shift) - 1;
-      while (read_index < num_digits)
+      while (readIndex < NumDigits)
       {
-        byte new_digit = (byte)(n >> shift);
-        n = (10 * (n & mask)) + digits[read_index++];
-        digits[write_index++] = new_digit;
+        byte newDigit = (byte)(n >> shift);
+        n = (10 * (n & mask)) + Digits[readIndex++];
+        Digits[writeIndex++] = newDigit;
       }
       while (n > 0)
       {
-        byte new_digit = (byte)(n >> shift);
+        byte newDigit = (byte)(n >> shift);
         n = 10 * (n & mask);
-        if (write_index < CalculationConstants.max_digits)
+        if (writeIndex < CalculationConstants.MaxDigits)
         {
-          digits[write_index++] = new_digit;
+          Digits[writeIndex++] = newDigit;
         }
-        else if (new_digit > 0)
+        else if (newDigit > 0)
         {
-          truncated = true;
+          Truncated = true;
         }
       }
-      num_digits = write_index;
-      trim();
+      NumDigits = writeIndex;
+      Trim();
     }
 
     // UTF-16 inputs
-    unsafe internal static DecimalInfo parse_decimal(char* p, char* pend, char decimal_separator)
+    unsafe internal static DecimalInfo ParseDecimal(char* p, char* pend, char decimalSeparator)
     {
-      DecimalInfo answer = new DecimalInfo() { negative = (*p == '-') };
+      DecimalInfo answer = new DecimalInfo() { Negative = (*p == '-') };
 
       if ((*p == '-') || (*p == '+'))
       {
@@ -325,21 +325,21 @@ namespace csFastFloat.Structures
       {
         ++p;
       }
-      while ((p != pend) && Utils.is_integer(*p, out uint cMinus0))
+      while ((p != pend) && Utils.IsInteger(*p, out uint cMinus0))
       {
-        if (answer.num_digits < CalculationConstants.max_digits)
+        if (answer.NumDigits < CalculationConstants.MaxDigits)
         {
-          answer.digits[answer.num_digits] = (byte)cMinus0;
+          answer.Digits[answer.NumDigits] = (byte)cMinus0;
         }
-        answer.num_digits++;
+        answer.NumDigits++;
         ++p;
       }
-      if ((p != pend) && (*p == decimal_separator))
+      if ((p != pend) && (*p == decimalSeparator))
       {
         ++p;
-        char* first_after_period = p;
+        char* firstAfterPeriod = p;
         // if we have not yet encountered a zero, we have to skip it as well
-        if (answer.num_digits == 0)
+        if (answer.NumDigits == 0)
         {
           // skip zeros
           while ((p != pend) && (*p == '0'))
@@ -347,76 +347,78 @@ namespace csFastFloat.Structures
             ++p;
           }
         }
-        while ((p != pend) && Utils.is_integer(*p, out uint cMinus0))
+        while ((p != pend) && Utils.IsInteger(*p, out uint cMinus0))
         {
-          if (answer.num_digits < CalculationConstants.max_digits)
+          if (answer.NumDigits < CalculationConstants.MaxDigits)
           {
-            answer.digits[answer.num_digits] = (byte)cMinus0;
+            answer.Digits[answer.NumDigits] = (byte)cMinus0;
           }
-          answer.num_digits++;
+          answer.NumDigits++;
           ++p;
         }
-        answer.decimal_point = (int)(first_after_period - p);
+        answer.DecimalPoint = (int)(firstAfterPeriod - p);
       }
-      // We want num_digits to be the number of significant digits, excluding
+      // We want NumDigits to be the number of significant digits, excluding
       // leading *and* trailing zeros! Otherwise the truncated flag later is
       // going to be misleading.
-      if (answer.num_digits > 0)
+      if (answer.NumDigits > 0)
       {
-        // We potentially need the answer.num_digits > 0 guard because we
-        // prune leading zeros. So with answer.num_digits > 0, we know that
+        // We potentially need the answer.NumDigits > 0 guard because we
+        // prune leading zeros. So with answer.NumDigits > 0, we know that
         // we have at least one non-zero digit.
         char* preverse = p - 1;
-        int trailing_zeros = 0;
-        while ((*preverse == '0') || (*preverse == decimal_separator))
+        int trailingZeros = 0;
+        while ((*preverse == '0') || (*preverse == decimalSeparator))
         {
-          if (*preverse == '0') { trailing_zeros++; };
+          if (*preverse == '0') { trailingZeros++; }
+          ;
           --preverse;
         }
-        answer.decimal_point += (int)(answer.num_digits);
-        answer.num_digits -= (uint)(trailing_zeros);
+        answer.DecimalPoint += (int)(answer.NumDigits);
+        answer.NumDigits -= (uint)(trailingZeros);
       }
-      if (answer.num_digits > CalculationConstants.max_digits)
+      if (answer.NumDigits > CalculationConstants.MaxDigits)
       {
-        answer.truncated = true;
-        answer.num_digits = CalculationConstants.max_digits;
+        answer.Truncated = true;
+        answer.NumDigits = CalculationConstants.MaxDigits;
       }
       if ((p != pend) && (('e' == *p) || ('E' == *p)))
       {
         ++p;
-        bool neg_exp = false;
+        bool negExp = false;
         if ((p != pend) && ('-' == *p))
         {
-          neg_exp = true;
+          negExp = true;
           ++p;
         }
         else if ((p != pend) && ('+' == *p))
         {
           ++p;
         }
-        int exp_number = 0; // exponential part
-        while ((p != pend) && Utils.is_integer(*p, out uint cMinus0))
+        long expNumber = 0; // exponential part
+        while ((p != pend) && Utils.IsInteger(*p, out uint cMinus0))
         {
           byte digit = (byte)cMinus0;
-          if (exp_number < 0x10000)
+          if (expNumber < (long)int.MaxValue + 400)
           {
-            exp_number = 10 * exp_number + digit;
+            expNumber = 10 * expNumber + digit;
           }
           ++p;
         }
-        answer.decimal_point += (neg_exp ? -exp_number : exp_number);
+        long decimalPoint = answer.DecimalPoint + (negExp ? -expNumber : expNumber);
+        answer.DecimalPoint = (int)Math.Max(int.MinValue, Math.Min(int.MaxValue, decimalPoint));
       }
       // In very rare cases, we may have fewer than 19 digits, we want to be able to reliably
-      // assume that all digits up to max_digit_without_overflow have been initialized.
-      for (uint i = answer.num_digits; i < CalculationConstants.max_digit_without_overflow; i++) { answer.digits[i] = 0; }
+      // assume that all digits up to MaxDigitWithoutOverflow have been initialized.
+      for (uint i = answer.NumDigits; i < CalculationConstants.MaxDigitWithoutOverflow; i++) { answer.Digits[i] = 0; }
 
       return answer;
     }
 
     // UTF-8/ASCII inputs
-    unsafe internal static DecimalInfo parse_decimal(byte* p, byte* pend, byte decimal_separator)
+    unsafe internal static DecimalInfo ParseDecimal(byte* p, byte* pend, byte decimalSeparator)
     {
-      DecimalInfo answer = new DecimalInfo() { negative = (*p == '-') };
+      DecimalInfo answer = new DecimalInfo() { Negative = (*p == '-') };
 
       if ((*p == '-') || (*p == '+'))
       {
@@ -427,21 +429,21 @@ namespace csFastFloat.Structures
       {
         ++p;
       }
-      while ((p != pend) && Utils.is_integer(*p, out uint digit))
+      while ((p != pend) && Utils.IsInteger(*p, out uint digit))
       {
-        if (answer.num_digits < CalculationConstants.max_digits)
+        if (answer.NumDigits < CalculationConstants.MaxDigits)
         {
-          answer.digits[answer.num_digits] = (byte)digit;
+          answer.Digits[answer.NumDigits] = (byte)digit;
         }
-        answer.num_digits++;
+        answer.NumDigits++;
         ++p;
       }
-      if ((p != pend) && (*p == decimal_separator))
+      if ((p != pend) && (*p == decimalSeparator))
       {
         ++p;
-        byte* first_after_period = p;
+        byte* firstAfterPeriod = p;
         // if we have not yet encountered a zero, we have to skip it as well
-        if (answer.num_digits == 0)
+        if (answer.NumDigits == 0)
         {
           // skip zeros
           while ((p != pend) && (*p == '0'))
@@ -449,67 +451,69 @@ namespace csFastFloat.Structures
             ++p;
           }
         }
-        while ((p != pend) && Utils.is_integer(*p, out uint digit))
+        while ((p != pend) && Utils.IsInteger(*p, out uint digit))
         {
-          if (answer.num_digits < CalculationConstants.max_digits)
+          if (answer.NumDigits < CalculationConstants.MaxDigits)
           {
-            answer.digits[answer.num_digits] = (byte)digit;
+            answer.Digits[answer.NumDigits] = (byte)digit;
           }
-          answer.num_digits++;
+          answer.NumDigits++;
           ++p;
         }
-        answer.decimal_point = (int)(first_after_period - p);
+        answer.DecimalPoint = (int)(firstAfterPeriod - p);
       }
-      // We want num_digits to be the number of significant digits, excluding
+      // We want NumDigits to be the number of significant digits, excluding
       // leading *and* trailing zeros! Otherwise the truncated flag later is
       // going to be misleading.
-      if (answer.num_digits > 0)
+      if (answer.NumDigits > 0)
       {
-        // We potentially need the answer.num_digits > 0 guard because we
-        // prune leading zeros. So with answer.num_digits > 0, we know that
+        // We potentially need the answer.NumDigits > 0 guard because we
+        // prune leading zeros. So with answer.NumDigits > 0, we know that
         // we have at least one non-zero digit.
         byte* preverse = p - 1;
-        int trailing_zeros = 0;
-        while ((*preverse == '0') || (*preverse == decimal_separator))
+        int trailingZeros = 0;
+        while ((*preverse == '0') || (*preverse == decimalSeparator))
         {
-          if (*preverse == '0') { trailing_zeros++; };
+          if (*preverse == '0') { trailingZeros++; }
+          ;
           --preverse;
         }
-        answer.decimal_point += (int)(answer.num_digits);
-        answer.num_digits -= (uint)(trailing_zeros);
+        answer.DecimalPoint += (int)(answer.NumDigits);
+        answer.NumDigits -= (uint)(trailingZeros);
       }
-      if (answer.num_digits > CalculationConstants.max_digits)
+      if (answer.NumDigits > CalculationConstants.MaxDigits)
       {
-        answer.truncated = true;
-        answer.num_digits = CalculationConstants.max_digits;
+        answer.Truncated = true;
+        answer.NumDigits = CalculationConstants.MaxDigits;
       }
       if ((p != pend) && (('e' == *p) || ('E' == *p)))
       {
         ++p;
-        bool neg_exp = false;
+        bool negExp = false;
         if ((p != pend) && ('-' == *p))
         {
-          neg_exp = true;
+          negExp = true;
           ++p;
         }
         else if ((p != pend) && ('+' == *p))
         {
           ++p;
         }
-        int exp_number = 0; // exponential part
-        while ((p != pend) && Utils.is_integer(*p, out uint digit))
+        long expNumber = 0; // exponential part
+        while ((p != pend) && Utils.IsInteger(*p, out uint digit))
         {
-          if (exp_number < 0x10000)
+          if (expNumber < (long)int.MaxValue + 400)
           {
-            exp_number = 10 * exp_number + (int)digit;
+            expNumber = 10 * expNumber + (int)digit;
           }
           ++p;
         }
-        answer.decimal_point += (neg_exp ? -exp_number : exp_number);
+        long decimalPoint = answer.DecimalPoint + (negExp ? -expNumber : expNumber);
+        answer.DecimalPoint = (int)Math.Max(int.MinValue, Math.Min(int.MaxValue, decimalPoint));
       }
       // In very rare cases, we may have fewer than 19 digits, we want to be able to reliably
-      // assume that all digits up to max_digit_without_overflow have been initialized.
-      for (uint i = answer.num_digits; i < CalculationConstants.max_digit_without_overflow; i++) { answer.digits[i] = 0; }
+      // assume that all digits up to MaxDigitWithoutOverflow have been initialized.
+      for (uint i = answer.NumDigits; i < CalculationConstants.MaxDigitWithoutOverflow; i++) { answer.Digits[i] = 0; }
 
       return answer;
     }

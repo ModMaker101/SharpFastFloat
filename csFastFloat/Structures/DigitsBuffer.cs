@@ -1,11 +1,11 @@
-﻿using csFastFloat.Constants;
+using csFastFloat.Constants;
 using System.Diagnostics;
 
 namespace csFastFloat.Structures
 {
   internal unsafe struct DigitsBuffer
   {
-    private fixed byte digits[(int)CalculationConstants.max_digits];
+    private fixed byte _digits[(int)CalculationConstants.MaxDigits];
 
     public byte this[int index]
     {
@@ -17,14 +17,14 @@ namespace csFastFloat.Structures
     {
       get
       {
-        Debug.Assert(index < CalculationConstants.max_digits);
-        return digits[index];
+        Debug.Assert(index < CalculationConstants.MaxDigits);
+        return _digits[index];
       }
 
       set
       {
-        Debug.Assert(index < CalculationConstants.max_digits);
-        digits[index] = value;
+        Debug.Assert(index < CalculationConstants.MaxDigits);
+        _digits[index] = value;
       }
     }
   }

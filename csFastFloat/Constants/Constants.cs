@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -8,23 +8,23 @@ namespace csFastFloat.Constants
   internal static class CalculationConstants
 
   {
-    internal const uint max_digits = 768;
-    internal const uint max_digit_without_overflow = 19;
-    internal const int decimal_point_range = 2047;
+    internal const uint MaxDigits = 768;
+    internal const uint MaxDigitWithoutOverflow = 19;
+    internal const int DecimalPointRange = 2047;
 
     // Precomputed powers of ten from 10^0 to 10^22. These
     // can be represented exactly using the double type.
-    internal readonly static double[] powers_of_ten_double = { 1e0,  1e1,  1e2,  1e3,  1e4,  1e5,  1e6,  1e7,  1e8,  1e9,  1e10, 1e11,
+    internal readonly static double[] PowersOfTenDouble = { 1e0,  1e1,  1e2,  1e3,  1e4,  1e5,  1e6,  1e7,  1e8,  1e9,  1e10, 1e11,
                                               1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19, 1e20, 1e21, 1e22};
 
-    internal readonly static float[] powers_of_ten_float = { 1e0F, 1e1F, 1e2F, 1e3F, 1e4F, 1e5F,
+    internal readonly static float[] PowersOfTenFloat = { 1e0F, 1e1F, 1e2F, 1e3F, 1e4F, 1e5F,
                                             1e6F, 1e7F, 1e8F, 1e9F, 1e10F};
 
-    internal const int smallest_power_of_five = -342;
-    internal const int largest_power_of_five = 308;
+    internal const int SmallestPowerOfFive = -342;
+    internal const int LargestPowerOfFive = 308;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static byte get_powers(uint n)
+    internal static byte GetPowers(uint n)
     {
       Debug.Assert(n < powersTable.Length);
       ref byte tableRef = ref MemoryMarshal.GetReference(powersTable);
@@ -37,18 +37,18 @@ namespace csFastFloat.Constants
     };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static ulong get_power_of_five_128(int index)
+    internal static ulong GetPowerOfFive128(int index)
     {
 #if NET5_0_OR_GREATER
-      Debug.Assert(index < power_of_five_128.Length);
-      ref ulong tableRef = ref MemoryMarshal.GetArrayDataReference(power_of_five_128);
+      Debug.Assert(index < s_powerOfFive128.Length);
+      ref ulong tableRef = ref MemoryMarshal.GetArrayDataReference(s_powerOfFive128);
       return Unsafe.Add(ref tableRef, (nint)(uint)index);
 # else
-      return power_of_five_128[index];
+      return s_powerOfFive128[index];
 #endif
     }
 
-    private readonly static ulong[] power_of_five_128 = {
+    private readonly static ulong[] s_powerOfFive128 = {
         0xeef453d6923bd65a,0x113faa2906a13b3f,
         0x9558b4661b6565f8,0x4ac7ca59a424c507,
         0xbaaee17fa23ebf76,0x5d79bcf00d2df649,

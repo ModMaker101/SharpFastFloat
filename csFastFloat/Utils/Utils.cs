@@ -1,4 +1,4 @@
-﻿using csFastFloat.Constants;
+using csFastFloat.Constants;
 using csFastFloat.Structures;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -8,6 +8,9 @@ using System.Runtime.InteropServices;
 
 #if HAS_INTRINSICS
 using System.Runtime.Intrinsics;
+#if NET5_0_OR_GREATER
+using System.Runtime.Intrinsics.Arm;
+#endif
 using System.Runtime.Intrinsics.X86;
 #endif
 
@@ -29,28 +32,28 @@ namespace csFastFloat
 #endif
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static uint parse_eight_digits_unrolled(ulong val)
+    internal static uint ParseEightDigitsUnrolled(ulong val)
     {
-      const ulong mask = 0x000000FF000000FF;
-      const ulong mul1 = 0x000F424000000064; // 100 + (1000000ULL << 32)
-      const ulong mul2 = 0x0000271000000001; // 1 + (10000ULL << 32)
+      const ulong Mask = 0x000000FF000000FF;
+      const ulong Mul1 = 0x000F424000000064; // 100 + (1000000ULL << 32)
+      const ulong Mul2 = 0x0000271000000001; // 1 + (10000ULL << 32)
       val -= 0x3030303030303030;
       val = (val * 10) + (val >> 8); // val = (val * 2561) >> 8;
-      val = (((val & mask) * mul1) + (((val >> 16) & mask) * mul2)) >> 32;
+      val = (((val & Mask) * Mul1) + (((val >> 16) & Mask) * Mul2)) >> 32;
       return (uint)val;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static uint parse_eight_digits_unrolled(byte* chars)
+    internal static uint ParseEightDigitsUnrolled(byte* chars)
     {
       ulong val = Unsafe.ReadUnaligned<ulong>(chars);
-      return parse_eight_digits_unrolled(val);
+      return ParseEightDigitsUnrolled(val);
     }
 
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool is_made_of_eight_digits_fast(byte* chars)
+    internal static bool IsMadeOfEightDigitsFast(byte* chars)
     {
       ulong val = Unsafe.ReadUnaligned<ulong>(chars);
       // We only enable paths depending on this function on little endian
@@ -61,7 +64,7 @@ namespace csFastFloat
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool is_integer(char c, out uint cMinus0)
+    internal static bool IsInteger(char c, out uint cMinus0)
     {
       uint cc = (uint)(c - '0');
       bool res = cc <= '9' - '0';
@@ -69,8 +72,56 @@ namespace csFastFloat
       return res;
     }
 
+    // Callers must ensure that at least four/eight characters remain.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool is_integer(byte c, out uint cMinus0)
+    internal static bool TryParseFourConsecutiveDigits(char* start, out uint value)
+    {
+      if (BitConverter.IsLittleEndian)
+      {
+        ulong digits = Unsafe.ReadUnaligned<ulong>(start) - 0x0030003000300030;
+        if (((digits | (digits + 0x0076007600760076)) & 0xFF80FF80FF80FF80) == 0)
+        {
+          value = (uint)((digits & 0xFFFF) * 1000 + ((digits >> 16) & 0xFFFF) * 100 +
+                         ((digits >> 32) & 0xFFFF) * 10 + (digits >> 48));
+          return true;
+        }
+        value = 0;
+        return false;
+      }
+      value = 0;
+      for (int i = 0; i < 4; ++i)
+      {
+        if (!IsInteger(start[i], out uint digit)) { value = 0; return false; }
+        value = value * 10 + digit;
+      }
+      return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool TryParseEightConsecutiveDigits(char* start, out uint value)
+    {
+#if HAS_INTRINSICS
+      if (Sse41.IsSupported
+#if NET5_0_OR_GREATER
+          || AdvSimd.IsSupported
+#endif
+         )
+      {
+        return TryParseEightConsecutiveDigitsSIMD(start, out value);
+      }
+#endif
+      if (TryParseFourConsecutiveDigits(start, out uint high) &&
+          TryParseFourConsecutiveDigits(start + 4, out uint low))
+      {
+        value = high * 10000 + low;
+        return true;
+      }
+      value = 0;
+      return false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool IsInteger(byte c, out uint cMinus0)
     {
       uint cc = (uint)(c - (byte)'0');
       bool res = cc <= '9' - '0';
@@ -79,30 +130,30 @@ namespace csFastFloat
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static value128 compute_product_approximation(int bitPrecision, long q, ulong w)
+    internal static value128 ComputeProductApproximation(int bitPrecision, long q, ulong w)
     {
-      int index = 2 * (int)(q - CalculationConstants.smallest_power_of_five);
+      int index = 2 * (int)(q - CalculationConstants.SmallestPowerOfFive);
       // For small values of q, e.g., q in [0,27], the answer is always exact because
       // The line value128 firstproduct = full_multiplication(w, power_of_five_128[index]);
       // gives the exact answer.
-      value128 firstproduct = FullMultiplication(w, CalculationConstants.get_power_of_five_128(index));
+      value128 firstproduct = FullMultiplication(w, CalculationConstants.GetPowerOfFive128(index));
       //static_assert((bit_precision >= 0) && (bit_precision <= 64), " precision should  be in (0,64]");
-      ulong precision_mask = (bitPrecision < 64) ? ((ulong)(0xFFFFFFFFFFFFFFFF) >> bitPrecision) : (ulong)(0xFFFFFFFFFFFFFFFF);
-      if ((firstproduct.high & precision_mask) == precision_mask)
+      ulong precisionMask = (bitPrecision < 64) ? ((ulong)(0xFFFFFFFFFFFFFFFF) >> bitPrecision) : (ulong)(0xFFFFFFFFFFFFFFFF);
+      if ((firstproduct.High & precisionMask) == precisionMask)
       { // could further guard with  (lower + w < lower)
         // regarding the second product, we only need secondproduct.high, but our expectation is that the compiler will optimize this extra work away if needed.
-        value128 secondproduct = FullMultiplication(w, CalculationConstants.get_power_of_five_128(index + 1));
-        firstproduct.low += secondproduct.high;
-        if (secondproduct.high > firstproduct.low)
+        value128 secondproduct = FullMultiplication(w, CalculationConstants.GetPowerOfFive128(index + 1));
+        firstproduct.Low += secondproduct.High;
+        if (secondproduct.High > firstproduct.Low)
         {
-          firstproduct.high++;
+          firstproduct.High++;
         }
       }
       return firstproduct;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static int power(int q)
+    internal static int Power(int q)
         => (((152170 + 65536) * q) >> 16) + 63;
 
 #if NET5_0_OR_GREATER
@@ -145,7 +196,7 @@ namespace csFastFloat
 #endif
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool is_ascii_space(char c)
+    internal static bool IsAsciiSpace(char c)
     {
       // ROS for one byte types can be read directly from metadata avoiding the array allocation.
       ReadOnlySpan<bool> table = new bool[] {
@@ -156,7 +207,7 @@ namespace csFastFloat
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool is_space(byte c)
+    internal static bool IsSpace(byte c)
     {
       // ROS for one byte types can be read directly from metadata avoiding the array allocation.
       ReadOnlySpan<bool> table = new bool[] {
@@ -177,33 +228,33 @@ namespace csFastFloat
     }
 
     [ExcludeFromCodeCoverage]
-    internal static bool strncasecmp(char* input1, string input2, int length)
+    internal static bool Strncasecmp(char* input1, string input2, int length)
     {
       fixed (char* p2 = input2)
       {
-        return strncasecmp(input1, p2, length);
+        return Strncasecmp(input1, p2, length);
       }
     }
 
-    internal static bool strncasecmp(char* input1, char* input2, int length)
+    internal static bool Strncasecmp(char* input1, char* input2, int length)
     {
-      int running_diff = 0;
+      int runningDiff = 0;
 
       for (int i = 0; i < length; i++)
       {
-        running_diff |= (input1[i] ^ input2[i]);
+        runningDiff |= (input1[i] ^ input2[i]);
       }
-      return (running_diff == 0) || (running_diff == 32);
+      return (runningDiff == 0) || (runningDiff == 32);
     }
-    internal static bool strncasecmp(byte* input1, ReadOnlySpan<byte> input2, int length)
+    internal static bool Strncasecmp(byte* input1, ReadOnlySpan<byte> input2, int length)
     {
-      int running_diff = 0;
+      int runningDiff = 0;
 
       for (int i = 0; i < length; i++)
       {
-        running_diff |= (input1[i] ^ input2[i]);
+        runningDiff |= (input1[i] ^ input2[i]);
       }
-      return (running_diff == 0) || (running_diff == 32);
+      return (runningDiff == 0) || (runningDiff == 32);
     }
 
 
@@ -264,9 +315,27 @@ namespace csFastFloat
     /// <param name="value">out : parsed value</param>
     /// <returns>bool : succes of operation : true meaning the sequence contains at least 8 consecutive digits</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool TryParseEightConsecutiveDigits_SIMD(char* start, out uint value)
+    internal static bool TryParseEightConsecutiveDigitsSIMD(char* start, out uint value)
     {
 
+#if NET5_0_OR_GREATER
+      if (AdvSimd.IsSupported)
+      {
+        Vector128<ushort> digits = AdvSimd.Subtract(AdvSimd.LoadVector128((ushort*)start), Vector128.Create((ushort)'0'));
+        Vector128<ushort> invalid = AdvSimd.CompareGreaterThan(digits, Vector128.Create((ushort)9));
+        if ((invalid.AsUInt64().GetElement(0) | invalid.AsUInt64().GetElement(1)) != 0)
+        {
+          value = 0;
+          return false;
+        }
+        // Narrow only after validating all UTF-16 lanes, so non-ASCII chars
+        // cannot be mistaken for digits with matching low bytes.
+        ulong packed = AdvSimd.ExtractNarrowingLower(digits).AsUInt64().GetElement(0);
+        value = ParseEightDigitsUnrolled(packed + 0x3030303030303030);
+        return true;
+      }
+
+#endif
       // escape if SIMD functions aren't available.
       if (!Sse41.IsSupported)
       {
@@ -278,9 +347,9 @@ namespace csFastFloat
       value = 0;
       Vector128<short> raw = Sse41.LoadDquVector128((short*)start);
       Vector128<short> ascii0 = Vector128.Create((short)(48 + short.MinValue));
-      Vector128<short> after_ascii9 = Vector128.Create((short)(short.MinValue + 9));
+      Vector128<short> afterAscii9 = Vector128.Create((short)(short.MinValue + 9));
       Vector128<short> a = Sse41.Subtract(raw, ascii0);
-      Vector128<short> b = Sse41.CompareLessThan(after_ascii9, a);
+      Vector128<short> b = Sse41.CompareLessThan(afterAscii9, a);
 
       if (!Sse41.TestZ(b, b))
       {

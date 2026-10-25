@@ -1,4 +1,4 @@
-﻿namespace TestcsFastFloat.Tests.Exaustive
+namespace TestcsFastFloat.Tests.Exaustive
 {
 
 #if BitOperations

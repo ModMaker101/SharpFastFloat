@@ -1,4 +1,4 @@
-﻿# csFastFloat : a fast and accurate float parser
+# csFastFloat : a fast and accurate float parser
 [![.NET](https://github.com/CarlVerret/csFastFloat/actions/workflows/dotnet.yml/badge.svg)](https://github.com/CarlVerret/csFastFloat/actions/workflows/dotnet.yml)
 
 C# port of Daniel Lemire's [fast_float](https://github.com/fastfloat/fast_float) fully ported from C++ to C#. In older versions (5.0 and under) it is up to 9 times faster than the standard library in some cases while providing exact results.
@@ -90,12 +90,12 @@ foreach (string l in lines)
 
 Input strings are expected to be valid UTF-16.
 
-Trailing content in the string is ignored.  You may pass an optional `out int characters_consumed` parameter
-`FastDoubleParser.ParseDouble(l, out int characters_consumed)` if you wich to check how many characters were processed. Some users may want to fail when the number of characters consumed does not match the string length.
+Trailing content in the string is ignored.  You may pass an optional `out int charactersConsumed` parameter
+`FastDoubleParser.ParseDouble(l, out int charactersConsumed)` if you wich to check how many characters were processed. Some users may want to fail when the number of characters consumed does not match the string length.
 
 
 For UTF-8 or ASCII inputs, you may pass a `ReadOnlySpan<byte>` argument. You can also pass
-an optional `out int characters_consumed` parameter to track the number of characters consumed
+an optional `out int charactersConsumed` parameter to track the number of characters consumed
 by the number pattern.
 
 
@@ -108,3 +108,19 @@ A special thanks to [Egor Bogatov](https://github.com/EgorBo) and all contributo
 # Reference
 
 - Daniel Lemire, [Number Parsing at a Gigabyte per Second](https://arxiv.org/abs/2101.11408), [Software: Practice and Experience](https://onlinelibrary.wiley.com/doi/10.1002/spe.2984) 51 (8), 2021.
+
+
+## Strict decimal parsing
+
+`FastDoubleParser.TryParseDoubleStrict` and `FastFloatParser.TryParseFloatStrict`
+accept either `ReadOnlySpan<char>` or `ReadOnlySpan<byte>`. They require a complete
+ASCII decimal token with an optional sign, decimal point (`.`), and exponent.
+Whitespace, grouping, trailing content, NaN, Infinity, and radix prefixes are
+rejected; callers should handle their language-specific rules before parsing.
+Failure returns false and zero. Overflow produces signed infinity, and zero or
+underflow preserves its sign. Float values round directly to binary32.
+
+The strict scanners use chunk parsing, short-integer paths, and an exact-integer
+return. Discarded zero-only tails preserve an exact coefficient, avoiding an
+unnecessary mantissa interval check. Other rounding cases retain the original
+input span for the exact fallback.

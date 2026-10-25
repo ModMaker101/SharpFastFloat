@@ -1,4 +1,4 @@
-﻿using csFastFloat;
+using csFastFloat;
 using System;
 using TestcsFastFloat.Tests;
 using Xunit;
@@ -36,13 +36,13 @@ namespace TestcsFastFloat.Basic.SIMD
     [InlineData(false, "1234 567")]
     [Theory]
 #pragma warning disable xUnit1026 // Theory methods should use all of their parameters
-    public unsafe void EvalAndParseEightDigits_SIMD_works_Scenarios(bool shouldPass, string sut)
+    public unsafe void EvalAndParseEightDigitsSIMDWorksScenarios(bool shouldPass, string sut)
 #pragma warning restore xUnit1026 // Theory methods should use all of their parameters
     {
       Skip.If(!Sse41.IsSupported, "No SIMD support");
       fixed (char* pos = sut)
       {
-        Assert.Equal(shouldPass, Utils.TryParseEightConsecutiveDigits_SIMD(pos, out uint res));
+        Assert.Equal(shouldPass, Utils.TryParseEightConsecutiveDigitsSIMD(pos, out uint res));
       }
 
     }
@@ -51,26 +51,26 @@ namespace TestcsFastFloat.Basic.SIMD
 
 
     [SkippableFact]
-    public void EvalAndParseEightDigits_SIMD_works_RandomInput()
+    public void EvalAndParseEightDigitsSIMDWorksRandomInput()
     {
 
       Skip.If(!Sse41.IsSupported, "No SIMD support");
 
 
 
-      Random RandNum = new Random();
+      Random randNum = new Random();
 
       for (int i = 0; i != 850000; i++)
       {
 
-        int RandomNumber = RandNum.Next(10000000, 99999999);
+        int randomNumber = randNum.Next(10000000, 99999999);
 
-        string sut = RandomNumber.ToString();
+        string sut = randomNumber.ToString();
         unsafe
         {
           fixed (char* pos = sut)
           {
-            Assert.True(Utils.TryParseEightConsecutiveDigits_SIMD(pos, out uint res));
+            Assert.True(Utils.TryParseEightConsecutiveDigitsSIMD(pos, out uint res));
             Assert.Equal(double.Parse(sut), res);
           }
         }
@@ -84,7 +84,7 @@ namespace TestcsFastFloat.Basic.SIMD
 
 
     [SkippableFact]
-    public void parse_eight_digits_simd_works()
+    public void ParseEightDigitsSimdWorks()
     {
       Skip.If(!Sse41.IsSupported, "No SIMD support");
 
@@ -99,7 +99,7 @@ namespace TestcsFastFloat.Basic.SIMD
 
           fixed (char* pos = sut)
           {
-            Assert.True(Utils.TryParseEightConsecutiveDigits_SIMD(pos, out uint res));
+            Assert.True(Utils.TryParseEightConsecutiveDigitsSIMD(pos, out uint res));
 
             Assert.Equal(double.Parse(sut), res);
           }

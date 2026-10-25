@@ -36,14 +36,14 @@ namespace TestcsFastFloat.Tests.Basic
       fixed (char* pa = a)
       fixed (char* pb = b)
       {
-        Assert.Equal(res, Utils.strncasecmp(pa, pb, len));
+        Assert.Equal(res, Utils.Strncasecmp(pa, pb, len));
       }
     }
 
     [Trait("Category", "Smoke Test")]
     [Theory]
     [MemberData(nameof(NonDecimalsData))]
-    unsafe public void DoubleParser_HandleInvalidInput_works(string input, double sut)
+    unsafe public void DoubleParserHandleInvalidInputWorks(string input, double sut)
     {
       fixed (char* p = input)
       {
@@ -55,7 +55,7 @@ namespace TestcsFastFloat.Tests.Basic
     [Trait("Category", "Smoke Test")]
     [Theory]
     [MemberData(nameof(NonDecimalsData))]
-    public unsafe void DoubleParser_NonDecimals_String(string input, double expected)
+    public unsafe void DoubleParserNonDecimalsString(string input, double expected)
     {
       var actual = FastDoubleParser.ParseDouble(input);
       Assert.Equal(expected, actual);
@@ -64,7 +64,7 @@ namespace TestcsFastFloat.Tests.Basic
     [Trait("Category", "Smoke Test")]
     [Theory]
     [MemberData(nameof(NonDecimalsData))]
-    public unsafe void DoubleParser_NonDecimals_Span(string input, double expected)
+    public unsafe void DoubleParserNonDecimalsSpan(string input, double expected)
     {
       var actual = FastDoubleParser.ParseDouble(input.AsSpan());
       Assert.Equal(expected, actual);
@@ -80,7 +80,7 @@ namespace TestcsFastFloat.Tests.Basic
 
 
     [Fact]
-    private void Issue_74()
+    private void Issue74()
     {
       // Consumed=0 vs raising Exceptions
       // Try parse should retrun false with consumed and result =0
@@ -95,16 +95,16 @@ namespace TestcsFastFloat.Tests.Basic
     }
 
     [Fact]
-    unsafe public void ParseDouble_Throws_When_NULL() => Assert.Throws<System.ArgumentNullException>(() => FastDoubleParser.ParseDouble((string)null));
+    unsafe public void ParseDoubleThrowsWhenNULL() => Assert.Throws<System.ArgumentNullException>(() => FastDoubleParser.ParseDouble((string)null));
 
     [Fact]
-    unsafe public void ParseDouble_Throws_When_Empty() => Assert.Throws<System.ArgumentException>(() => FastDoubleParser.ParseDouble(string.Empty));
+    unsafe public void ParseDoubleThrowsWhenEmpty() => Assert.Throws<System.ArgumentException>(() => FastDoubleParser.ParseDouble(string.Empty));
 
     [Theory]
     [InlineData("some alpha")]
     [InlineData("-")]
     [InlineData("1ee10")]
-    unsafe public void ParseDouble_Throws_When_Invalid(string sut) => Assert.Throws<System.ArgumentException>(() => FastDoubleParser.ParseDouble(sut));
+    unsafe public void ParseDoubleThrowsWhenInvalid(string sut) => Assert.Throws<System.ArgumentException>(() => FastDoubleParser.ParseDouble(sut));
 
 
     [Theory]
@@ -113,7 +113,7 @@ namespace TestcsFastFloat.Tests.Basic
     [InlineData(null)]
     [InlineData("-")]
     [InlineData("1ee10")]
-    public void TryParse_NeverThrows(string sut)
+    public void TryParseNeverThrows(string sut)
     {
 
       Assert.False(FastDoubleParser.TryParseDouble(sut, out _));
@@ -125,7 +125,7 @@ namespace TestcsFastFloat.Tests.Basic
 
 
     [SkippableFact]
-    unsafe public void ParseNumberString_Works_Scnenarios()
+    unsafe public void ParseNumberStringWorksScnenarios()
     {
 
 
@@ -169,7 +169,7 @@ namespace TestcsFastFloat.Tests.Basic
           char* pend = p + kv.Value.Length;
           var res = ParsedNumberString.ParseNumberString(p, pend);
 
-          sb.AppendLine($"Resultat : {res.exponent} {res.mantissa} {res.negative} {res.valid}");
+          sb.AppendLine($"Resultat : {res.Exponent} {res.Mantissa} {res.Negative} {res.Valid}");
           sb.AppendLine();
         }
       }
@@ -188,7 +188,7 @@ namespace TestcsFastFloat.Tests.Basic
     }
 
     [SkippableFact]
-    unsafe public void ParseNumber_Works_Scnenarios()
+    unsafe public void ParseNumberWorksScnenarios()
     {
       Skip.If(base.NoDiffToolDetected(), "No diff tool detected");
 
@@ -250,7 +250,7 @@ namespace TestcsFastFloat.Tests.Basic
 
     [Trait("Category", "Smoke Test")]
     [Fact]
-    public void cas_compute_float_64_1()
+    public void CasComputeFloat641()
     {
       for (int p = -306; p <= 308; p++)
       {
@@ -264,14 +264,14 @@ namespace TestcsFastFloat.Tests.Basic
         if (!d.HasValue)
           throw new ApplicationException($"Can't parse p=> {p}");
 
-        if (d != testing_power_of_ten[p + 307])
+        if (d != s_testingPowerOfTen[p + 307])
           throw new ApplicationException($"bad parsing p=> {p}");
       }
     }
 
     [Trait("Category", "Smoke Test")]
     [Fact]
-    unsafe public void cas_compute_float_64_2()
+    unsafe public void CasComputeFloat642()
     {
       for (int p = -1000; p <= 308; p++)
       {
@@ -285,7 +285,7 @@ namespace TestcsFastFloat.Tests.Basic
             throw new ApplicationException($"Can't parse p=> 1e{p}");
           }
 
-          double expected = ((p >= -307) ? testing_power_of_ten[p + 307] : Math.Pow(10, p));
+          double expected = ((p >= -307) ? s_testingPowerOfTen[p + 307] : Math.Pow(10, p));
           Assert.Equal(expected, d.Value);
         }
       }
@@ -296,7 +296,7 @@ namespace TestcsFastFloat.Tests.Basic
     [InlineData("   -1.5", 7)]
     [InlineData(" \t 2.5e3 trailing", 8)]
     [InlineData("1.5", 3)]
-    public void TryParseDouble_String_CharsConsumed_IncludesLeadingWhitespace(string input, int expectedConsumed)
+    public void TryParseDoubleStringCharsConsumedIncludesLeadingWhitespace(string input, int expectedConsumed)
     {
       Assert.True(FastDoubleParser.TryParseDouble(input, out int consumed, out double _));
       Assert.Equal(expectedConsumed, consumed);
@@ -306,7 +306,7 @@ namespace TestcsFastFloat.Tests.Basic
     [InlineData("  1", 3)]
     [InlineData("   -1.5", 7)]
     [InlineData(" \t 2.5e3 trailing", 8)]
-    public unsafe void TryParseDouble_CharPointer_CharsConsumed_IncludesLeadingWhitespace(string input, int expectedConsumed)
+    public unsafe void TryParseDoubleCharPointerCharsConsumedIncludesLeadingWhitespace(string input, int expectedConsumed)
     {
       fixed (char* p = input)
       {
@@ -319,7 +319,7 @@ namespace TestcsFastFloat.Tests.Basic
     [InlineData("  1", 3)]
     [InlineData("   -1.5", 7)]
     [InlineData(" \t 2.5e3 trailing", 8)]
-    public unsafe void TryParseDouble_BytePointer_CharsConsumed_IncludesLeadingWhitespace(string input, int expectedConsumed)
+    public unsafe void TryParseDoubleBytePointerCharsConsumedIncludesLeadingWhitespace(string input, int expectedConsumed)
     {
       byte[] bytes = Encoding.ASCII.GetBytes(input);
       fixed (byte* p = bytes)
@@ -330,7 +330,7 @@ namespace TestcsFastFloat.Tests.Basic
     }
 
     [Fact]
-    public void TryParseDouble_ConsumedCount_AdvancesPastWholeInput()
+    public void TryParseDoubleConsumedCountAdvancesPastWholeInput()
     {
       string sut = "  1.5 -2.25e1 7";
       int pos = 0;
@@ -352,7 +352,7 @@ namespace TestcsFastFloat.Tests.Basic
     [InlineData("12,345.5", 12345.5)]
     [InlineData("-1,234.5", -1234.5)]
     [InlineData("1,234,567,890,123,456,789,012,345", 1234567890123456789012345d)]
-    public void ParseDouble_AllowThousands_MatchesBcl(string input, double expected)
+    public void ParseDoubleAllowThousandsMatchesBcl(string input, double expected)
     {
       var styles = NumberStyles.Float | NumberStyles.AllowThousands;
       var bcl = double.Parse(input, styles, CultureInfo.InvariantCulture);
@@ -363,7 +363,7 @@ namespace TestcsFastFloat.Tests.Basic
     }
 
     [Fact]
-    public void ParseDouble_NoAllowThousands_StopsAtSeparator()
+    public void ParseDoubleNoAllowThousandsStopsAtSeparator()
     {
       Assert.True(FastDoubleParser.TryParseDouble("1,234.5", out int consumed, out double result));
       Assert.Equal(1d, result);
@@ -371,16 +371,16 @@ namespace TestcsFastFloat.Tests.Basic
     }
 
     [Fact]
-    public void ParseDouble_AllowThousands_CustomSeparator()
+    public void ParseDoubleAllowThousandsCustomSeparator()
     {
       // European convention: '.' as thousands, ',' as decimal.
       var styles = NumberStyles.Float | NumberStyles.AllowThousands;
-      var ff = FastDoubleParser.ParseDouble("1.234.567,89", styles, decimal_separator: ',', thousands_separator: '.');
+      var ff = FastDoubleParser.ParseDouble("1.234.567,89", styles, decimalSeparator: ',', thousandsSeparator: '.');
       Assert.Equal(1234567.89, ff);
     }
 
     [Fact]
-    public unsafe void ParseDouble_AllowThousands_BytePointer()
+    public unsafe void ParseDoubleAllowThousandsBytePointer()
     {
       byte[] bytes = Encoding.ASCII.GetBytes("1,234,567.89");
       var styles = NumberStyles.Float | NumberStyles.AllowThousands;
@@ -392,7 +392,7 @@ namespace TestcsFastFloat.Tests.Basic
       }
     }
 
-    private static double[] testing_power_of_ten =  {
+    private static double[] s_testingPowerOfTen =  {
     1e-307, 1e-306, 1e-305, 1e-304, 1e-303, 1e-302, 1e-301, 1e-300, 1e-299,
     1e-298, 1e-297, 1e-296, 1e-295, 1e-294, 1e-293, 1e-292, 1e-291, 1e-290,
     1e-289, 1e-288, 1e-287, 1e-286, 1e-285, 1e-284, 1e-283, 1e-282, 1e-281,
@@ -465,7 +465,7 @@ namespace TestcsFastFloat.Tests.Basic
 
 
     [Fact]
-    public void ParseDouble_CharConsumed_Throws_OnlyAlpha()
+    public void ParseDoubleCharConsumedThrowsOnlyAlpha()
     {
       int nbCarConsumed;
       Assert.Throws<System.ArgumentException>(() => FastDoubleParser.ParseDouble("some alpha", out nbCarConsumed));
@@ -476,7 +476,7 @@ namespace TestcsFastFloat.Tests.Basic
 
 
     [SkippableFact]
-    public void ParseDouble_CharConsumed_Works_Scenarios()
+    public void ParseDoubleCharConsumedWorksScenarios()
     {
       Skip.If(base.NoDiffToolDetected(), "No diff tool detected");
 
@@ -547,7 +547,7 @@ namespace TestcsFastFloat.Tests.Basic
 
     [Trait("Category", "Smoke Test")]
     [SkippableFact]
-    public void ParseDouble_charConsumed_WholeString()
+    public void ParseDoubleCharConsumedWholeString()
     {
       Skip.If(base.NoDiffToolDetected(), "No diff tool detected");
 

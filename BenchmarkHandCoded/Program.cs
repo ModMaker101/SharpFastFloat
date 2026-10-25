@@ -1,6 +1,6 @@
-﻿using System;
-using System.Diagnostics;
 using csFastFloat;
+using System;
+using System.Diagnostics;
 using System.Globalization;
 
 namespace BenchmarkHandCoded
@@ -10,11 +10,11 @@ namespace BenchmarkHandCoded
     public delegate double ParsingFunc(string[] values);
     public delegate double ParsingFuncUTF8(byte[][] values);
 
-    static internal Tuple<double, double, double> time_it_ns<T>(string[] lines, ParsingFunc sut, long repeat)
+    static internal Tuple<double, double, double> TimeItNs<T>(string[] lines, ParsingFunc sut, long repeat)
     {
       double average = 0;
-      double average_tpr = 0; // tick per run
-      double min_value = double.MaxValue;
+      double averageTpr = 0; // tick per run
+      double minValue = double.MaxValue;
 
       //  warmup
       for (int i = 0; i != 250; i++)
@@ -42,20 +42,20 @@ namespace BenchmarkHandCoded
         var dif = sw.Elapsed.TotalMilliseconds * 1000000;
 
         average += dif;
-        average_tpr += sw.ElapsedTicks;
+        averageTpr += sw.ElapsedTicks;
 
-        min_value = min_value < dif ? min_value : dif;
+        minValue = minValue < dif ? minValue : dif;
       }
 
       average /= repeat;
-      average_tpr /= repeat;
-      return new Tuple<double, double, double>(min_value, average,average_tpr);
+      averageTpr /= repeat;
+      return new Tuple<double, double, double>(minValue, average, averageTpr);
     }
-    static internal Tuple<double, double, double> time_it_ns_ut8<T>(byte[][] lines, ParsingFuncUTF8 sut, long repeat)
+    static internal Tuple<double, double, double> TimeItNsUt8<T>(byte[][] lines, ParsingFuncUTF8 sut, long repeat)
     {
-      double average_tpr= 0;
+      double averageTpr = 0;
       double average = 0;
-      double min_value = double.MaxValue;
+      double minValue = double.MaxValue;
 
       //  warmup
       for (int i = 0; i != 250; i++)
@@ -81,21 +81,21 @@ namespace BenchmarkHandCoded
 
 
         var dif = sw.Elapsed.TotalMilliseconds * 1000000;
-        average_tpr += sw.ElapsedTicks;
+        averageTpr += sw.ElapsedTicks;
         average += dif;
 
 
-        min_value = min_value < dif ? min_value : dif;
+        minValue = minValue < dif ? minValue : dif;
       }
-      average_tpr /= repeat;
+      averageTpr /= repeat;
       average /= repeat;
-      return new Tuple<double, double, double>(min_value, average,average_tpr);
+      return new Tuple<double, double, double>(minValue, average, averageTpr);
     }
 
     internal static string[] GetLinesFromFile(string fileName) =>
         System.IO.File.ReadAllLines(fileName);
 
-    private static double find_max_fast_float(string[] lines)
+    private static double FindMaxFastFloat(string[] lines)
     {
 
       double max = double.MinValue;
@@ -109,7 +109,7 @@ namespace BenchmarkHandCoded
       return max;
     }
 
-    private static double find_max_fast_float_try(string[] lines)
+    private static double FindMaxFastFloatTry(string[] lines)
     {
 
       double max = double.MinValue;
@@ -131,7 +131,7 @@ namespace BenchmarkHandCoded
       return max;
     }
 
-    private static double find_max_fast_float_utf8(byte[][] lines)
+    private static double FindMaxFastFloatUtf8(byte[][] lines)
     {
 
       double max = double.MinValue;
@@ -144,7 +144,7 @@ namespace BenchmarkHandCoded
       return max;
     }
 
-    private static double find_max_fast_float_try_utf8(byte[][] lines)
+    private static double FindMaxFastFloatTryUtf8(byte[][] lines)
     {
 
       double max = double.MinValue;
@@ -167,7 +167,7 @@ namespace BenchmarkHandCoded
 
 
 
-    private static double find_max_double_parse(string[] lines)
+    private static double FindMaxDoubleParse(string[] lines)
     {
       double max = double.MinValue;
       foreach (string l in lines)
@@ -179,20 +179,20 @@ namespace BenchmarkHandCoded
       return max;
     }
 
-    static private void pretty_print(double volume, uint number_of_floats, string name, Tuple<double, double, double> result)
+    static private void PrettyPrint(double volume, uint numberOfFloats, string name, Tuple<double, double, double> result)
     {
       double volumeMB = volume / (1024.0 * 1024.0);
       Console.Write("| {0,-40}|{1,8:f2} (+/- {2:f1} % ) |", name, volumeMB * 1000000000 / result.Item1, (result.Item2 - result.Item1) * 100.0 / result.Item2);
-      Console.Write("{0,8:f2}  | ", number_of_floats * 1000 / result.Item1);
-      Console.Write(" {0,8:f2} | ", (double)result.Item1 / number_of_floats);
-      Console.Write(" {0,8:f2} |  \n", (double)result.Item3 / number_of_floats);
+      Console.Write("{0,8:f2}  | ", numberOfFloats * 1000 / result.Item1);
+      Console.Write(" {0,8:f2} | ", (double)result.Item1 / numberOfFloats);
+      Console.Write(" {0,8:f2} |  \n", (double)result.Item3 / numberOfFloats);
     }
 
     private static void Main(string[] args)
     {
       string fileName = @"data/canada.txt";
       var lines = GetLinesFromFile(fileName);
-      var _linesUtf8 = Array.ConvertAll(lines, System.Text.Encoding.UTF8.GetBytes);
+      var linesUtf8 = Array.ConvertAll(lines, System.Text.Encoding.UTF8.GetBytes);
       int volume = 0;
       foreach (string l in lines)
       {
@@ -200,30 +200,30 @@ namespace BenchmarkHandCoded
       }
 
 
-      print_separator();
+      PrintSeparator();
       double volumeMB = volume / (1024.0 * 1024.0);
-    
-      Console.WriteLine("canada.txt - Volume : {0:N2} MB",volumeMB);
-      process_test(lines, _linesUtf8, (double)volume);
 
-    
+      Console.WriteLine("canada.txt - Volume : {0:N2} MB", volumeMB);
+      ProcessTest(lines, linesUtf8, (double)volume);
+
+
       lines = GetLinesFromFile(@"data/mesh.txt");
-      _linesUtf8 = Array.ConvertAll(lines, System.Text.Encoding.UTF8.GetBytes);
+      linesUtf8 = Array.ConvertAll(lines, System.Text.Encoding.UTF8.GetBytes);
       volume = 0;
       foreach (string l in lines)
       {
         volume += l.Length;
       }
       volumeMB = volume / (1024.0 * 1024.0);
-      
-      print_separator();
-      Console.WriteLine("mesh.txt - Volume : {0:N2} MB",volumeMB);
 
-      process_test(lines, _linesUtf8, (double)volume);
+      PrintSeparator();
+      Console.WriteLine("mesh.txt - Volume : {0:N2} MB", volumeMB);
 
-     
+      ProcessTest(lines, linesUtf8, (double)volume);
+
+
       lines = GetLinesFromFile(@"data/synthetic.txt");
-      _linesUtf8 = Array.ConvertAll(lines, System.Text.Encoding.UTF8.GetBytes);
+      linesUtf8 = Array.ConvertAll(lines, System.Text.Encoding.UTF8.GetBytes);
 
       volume = 0;
       foreach (string l in lines)
@@ -231,38 +231,38 @@ namespace BenchmarkHandCoded
         volume += l.Length;
       }
       volumeMB = volume / (1024.0 * 1024.0);
-    
-      print_separator();
-     Console.WriteLine("synthetic.txt - Volume : {0:N2} MB",volumeMB);
 
-      process_test(lines, _linesUtf8, (double)volume);
+      PrintSeparator();
+      Console.WriteLine("synthetic.txt - Volume : {0:N2} MB", volumeMB);
+
+      ProcessTest(lines, linesUtf8, (double)volume);
 
 
     }
 
 
-    private static void print_header()
+    private static void PrintHeader()
     {
-      print_separator();
-      Console.WriteLine("| Test name".PadRight(42) + "|                 MB/s |"+ " Mfloat/s | min ns/f | avg tick/f |");
-      print_separator();
+      PrintSeparator();
+      Console.WriteLine("| Test name".PadRight(42) + "|                 MB/s |" + " Mfloat/s | min ns/f | avg tick/f |");
+      PrintSeparator();
     }
-    private static void print_separator()
+    private static void PrintSeparator()
     {
       Console.WriteLine("-----------------------------------------------------------------------------------------------------");
     }
 
-    private static void process_test(string[] lines, byte[][] linesUTF8, double volume)
+    private static void ProcessTest(string[] lines, byte[][] linesUtf8, double volume)
     {
 
-      print_header();
+      PrintHeader();
 
-      pretty_print(volume, (uint)lines.Length, "Double.Parse", time_it_ns<double>(lines, find_max_double_parse, 100));
-      pretty_print(volume, (uint)lines.Length, "FastParser.ParseDouble", time_it_ns<double>(lines, find_max_fast_float, 100));
-      pretty_print(volume, (uint)lines.Length, "FastParser.TryParseDouble", time_it_ns<double>(lines, find_max_fast_float_try, 100));
-      pretty_print(volume, (uint)lines.Length, "FastParser.ParseDouble UT8", time_it_ns_ut8<double>(linesUTF8, find_max_fast_float_utf8, 100));
-      pretty_print(volume, (uint)lines.Length, "FastParser.TryParseDouble UT8", time_it_ns_ut8<double>(linesUTF8, find_max_fast_float_try_utf8, 100));
-      print_separator();
+      PrettyPrint(volume, (uint)lines.Length, "Double.Parse", TimeItNs<double>(lines, FindMaxDoubleParse, 100));
+      PrettyPrint(volume, (uint)lines.Length, "FastParser.ParseDouble", TimeItNs<double>(lines, FindMaxFastFloat, 100));
+      PrettyPrint(volume, (uint)lines.Length, "FastParser.TryParseDouble", TimeItNs<double>(lines, FindMaxFastFloatTry, 100));
+      PrettyPrint(volume, (uint)lines.Length, "FastParser.ParseDouble UT8", TimeItNsUt8<double>(linesUtf8, FindMaxFastFloatUtf8, 100));
+      PrettyPrint(volume, (uint)lines.Length, "FastParser.TryParseDouble UT8", TimeItNsUt8<double>(linesUtf8, FindMaxFastFloatTryUtf8, 100));
+      PrintSeparator();
 
     }
 

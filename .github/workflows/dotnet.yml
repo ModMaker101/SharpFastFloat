@@ -33,7 +33,7 @@ jobs:
       run: dotnet restore
 
     - name: Check formatting
-      run: dotnet format csFastFloat.sln --no-restore --verify-no-changes
+      run: dotnet format SharpFastFloat.sln --no-restore --verify-no-changes
 
     - name: Build
       run: dotnet build --no-restore  --configuration Release -p:ContinuousIntegrationBuild=true
@@ -62,4 +62,4 @@ jobs:
       with:
         dotnet-version: 9.0.x
     - name: Test decimal scanners with SIMD and scalar paths
-      run: dotnet test TestcsFastFloat/TestcsFastFloat.csproj -f net9.0 -c Release --filter 'FullyQualifiedName~StrictDoubleParserTests|FullyQualifiedName~StrictEntryPointTests|FullyQualifiedName~RegularScannerTests'
+      run: dotnet test SharpFastFloat.Tests/SharpFastFloat.Tests.csproj -f net9.0 -c Release --filter 'FullyQualifiedName~StrictDoubleParserTests|FullyQualifiedName~StrictEntryPointTests|FullyQualifiedName~RegularScannerTests|FullyQualifiedName~ExactMidpointTests|FullyQualifiedName~RoundingIntegerTests'

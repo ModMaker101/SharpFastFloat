@@ -1,11 +1,11 @@
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0
+FROM mcr.microsoft.com/dotnet/sdk:9.0
 WORKDIR /src
 COPY . .
 RUN dotnet restore
 
-RUN dotnet build "BenchmarkHandCoded/BenchmarkHandCoded.csproj" -c Release -o /src/bin 
-RUN dotnet publish "BenchmarkHandCoded/BenchmarkHandCoded.csproj" -c Release -o /src/bin/publish
+RUN dotnet build "SharpFastFloat.BenchmarkHandCoded/SharpFastFloat.BenchmarkHandCoded.csproj" -c Release -o /src/bin
+RUN dotnet publish "SharpFastFloat.BenchmarkHandCoded/SharpFastFloat.BenchmarkHandCoded.csproj" -c Release -o /src/bin/publish
 
 WORKDIR /src/bin/publish
-ENTRYPOINT ["dotnet", "BenchmarkHandCoded.dll"]
+ENTRYPOINT ["dotnet", "SharpFastFloat.BenchmarkHandCoded.dll"]

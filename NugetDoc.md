@@ -1,9 +1,13 @@
-# csFastFloat : a fast and accurate float parser
-[![.NET](https://github.com/CarlVerret/csFastFloat/actions/workflows/dotnet.yml/badge.svg)](https://github.com/CarlVerret/csFastFloat/actions/workflows/dotnet.yml)
+# SharpFastFloat : a fast and accurate float parser
+[![.NET](https://github.com/ModMaker101/SharpFastFloat/actions/workflows/dotnet.yml/badge.svg)](https://github.com/ModMaker101/SharpFastFloat/actions/workflows/dotnet.yml)
 
-C# port of Daniel Lemire's [fast_float](https://github.com/fastfloat/fast_float)  fully ported from C++ to C#. It is almost 7 times faster than the standard library in some cases while providing exact results.
+SharpFastFloat is a performance-focused fork of [csFastFloat](https://github.com/CarlVerret/csFastFloat),
+derived from [fast_float](https://github.com/fastfloat/fast_float). It provides correctly
+rounded float/double parsing for UTF-16 and UTF-8, strict decimal APIs, SIMD scanning,
+and stack-backed midpoint rounding. Use the `SharpFastFloat` package and namespace.
 
-
+The benchmark results below were inherited from upstream and are historical.
+For fork-specific results, see the repository README.
 
 # Benchmarks
 
@@ -44,7 +48,7 @@ Two functions are available: `FastDoubleParser.ParseDouble` and `FastFloatParser
 `String`, `char *`  and `ReadOnlySpan<char>` are supported inputs.
 
 ```C#
-using csFastFloat;
+using SharpFastFloat;
 
 
 double x;

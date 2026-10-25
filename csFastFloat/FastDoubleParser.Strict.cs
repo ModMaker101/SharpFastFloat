@@ -37,7 +37,7 @@ namespace csFastFloat
         // Every integer through 2^53 is exactly representable. Negation also
         // preserves the sign of zero. Larger integers use the rounding engine.
         if (p == last && hasDigits && significantDigits <= 19 &&
-            mantissa <= DoubleBinaryConstants.max_mantissa_fast_path)
+            mantissa <= DoubleBinaryConstants.MaxMantissaFastPath)
         {
           result = negative ? -(double)mantissa : (double)mantissa;
           return true;
@@ -79,10 +79,10 @@ namespace csFastFloat
 
         ParsedNumberString number = new ParsedNumberString
         {
-          mantissa = mantissa,
-          exponent = exponent,
-          negative = negative,
-          too_many_digits = significantDigits > 19
+          Mantissa = mantissa,
+          Exponent = exponent,
+          Negative = negative,
+          TooManyDigits = significantDigits > 19
         };
         result = ConvertNumber(first, last, number, '.');
         return true;

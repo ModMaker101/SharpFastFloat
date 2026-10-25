@@ -63,27 +63,27 @@ namespace TestcsFastFloat.Tests.ff_suppl_tests
         if (sut.Length != 4) throw new Exception($"Invalid file in file {curntLine}");
 
         // Make sense of s,f,d
-        short _s = ShortFromHexString(sut[0]);
-        float _f = FloatFromHexString(sut[1]);
-        double _d = DoubleFromHexString(sut[2]);
+        short expectedShort = ShortFromHexString(sut[0]);
+        float expectedFloat = FloatFromHexString(sut[1]);
+        double expectedDouble = DoubleFromHexString(sut[2]);
 
         // parse and assert equality
         float f = FastFloatParser.ParseFloat(sut[3]);
-        Assert.True(_f == f);
+        Assert.True(expectedFloat == f);
         double d = FastDoubleParser.ParseDouble(sut[3]);
-        Assert.True(_d == d);
+        Assert.True(expectedDouble == d);
 
         // parse and assert equality
-        float f_span = FastFloatParser.ParseFloat(sut[3].AsSpan());
-        Assert.True(_f == f_span);
-        double d_span = FastDoubleParser.ParseDouble(sut[3].AsSpan());
-        Assert.True(_d == d_span);
+        float fSpan = FastFloatParser.ParseFloat(sut[3].AsSpan());
+        Assert.True(expectedFloat == fSpan);
+        double dSpan = FastDoubleParser.ParseDouble(sut[3].AsSpan());
+        Assert.True(expectedDouble == dSpan);
 
         // parse and assert equality
-        float f_utf8 = FastFloatParser.ParseFloat(System.Text.Encoding.UTF8.GetBytes(sut[3]));
-        Assert.True(_f == f_utf8);
-        double d_utf8 = FastDoubleParser.ParseDouble(System.Text.Encoding.UTF8.GetBytes(sut[3]));
-        Assert.True(_d == d_utf8);
+        float fUtf8 = FastFloatParser.ParseFloat(System.Text.Encoding.UTF8.GetBytes(sut[3]));
+        Assert.True(expectedFloat == fUtf8);
+        double dUtf8 = FastDoubleParser.ParseDouble(System.Text.Encoding.UTF8.GetBytes(sut[3]));
+        Assert.True(expectedDouble == dUtf8);
 
         counter++;
         testCount += 6;

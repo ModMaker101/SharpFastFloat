@@ -58,14 +58,14 @@ namespace TestcsFastFloat.Basic.SIMD
 
 
 
-      Random RandNum = new Random();
+      Random randNum = new Random();
 
       for (int i = 0; i != 850000; i++)
       {
 
-        int RandomNumber = RandNum.Next(10000000, 99999999);
+        int randomNumber = randNum.Next(10000000, 99999999);
 
-        string sut = RandomNumber.ToString();
+        string sut = randomNumber.ToString();
         unsafe
         {
           fixed (char* pos = sut)

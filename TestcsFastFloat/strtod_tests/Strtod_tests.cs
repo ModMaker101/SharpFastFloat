@@ -71,22 +71,22 @@ namespace TestcsFastFloat.suppl_tests
             var sut = curntLine.Split('=')[1].Replace("\"", "").Trim();
 
 
-            if (!double.TryParse(sut, out double _db_val))
+            if (!double.TryParse(sut, out double dbVal))
             {
               sb.AppendLine("d   = *** can't parse *** ");
             }
             else
             {
-              sb.AppendLine($"d   = {_db_val}");
+              sb.AppendLine($"d   = {dbVal}");
             }
 
-            if (!FastDoubleParser.TryParseDouble(sut, out double _ff_val))
+            if (!FastDoubleParser.TryParseDouble(sut, out double ffVal))
             {
               sb.AppendLine("ff   = *** can't parse *** ");
             }
             else
             {
-              sb.AppendLine($"ff  = {_ff_val}");
+              sb.AppendLine($"ff  = {ffVal}");
             }
 
 

@@ -1,4 +1,4 @@
-﻿# csFastFloat : a fast and accurate float parser
+# csFastFloat : a fast and accurate float parser
 [![.NET](https://github.com/CarlVerret/csFastFloat/actions/workflows/dotnet.yml/badge.svg)](https://github.com/CarlVerret/csFastFloat/actions/workflows/dotnet.yml)
 
 C# port of Daniel Lemire's [fast_float](https://github.com/fastfloat/fast_float) fully ported from C++ to C#. In older versions (5.0 and under) it is up to 9 times faster than the standard library in some cases while providing exact results.
@@ -90,12 +90,12 @@ foreach (string l in lines)
 
 Input strings are expected to be valid UTF-16.
 
-Trailing content in the string is ignored.  You may pass an optional `out int characters_consumed` parameter
-`FastDoubleParser.ParseDouble(l, out int characters_consumed)` if you wich to check how many characters were processed. Some users may want to fail when the number of characters consumed does not match the string length.
+Trailing content in the string is ignored.  You may pass an optional `out int charactersConsumed` parameter
+`FastDoubleParser.ParseDouble(l, out int charactersConsumed)` if you wich to check how many characters were processed. Some users may want to fail when the number of characters consumed does not match the string length.
 
 
 For UTF-8 or ASCII inputs, you may pass a `ReadOnlySpan<byte>` argument. You can also pass
-an optional `out int characters_consumed` parameter to track the number of characters consumed
+an optional `out int charactersConsumed` parameter to track the number of characters consumed
 by the number pattern.
 
 

@@ -34,14 +34,14 @@ namespace csFastFloat.Benchmark
 
     public string GetValue(Summary summary, BenchmarkCase benchmarkCase, SummaryStyle style)
     {
-      var disp_info = benchmarkCase.DisplayInfo;
+      var dispInfo = benchmarkCase.DisplayInfo;
 
       var fileName = benchmarkCase.Parameters.Items.FirstOrDefault(x => x.Name == "FileName").ToString();
 
 
       var nbFloat = System.IO.File.ReadAllLines(fileName).Count();
 
-      var s = summary.Reports.Where(x => x.BenchmarkCase.DisplayInfo == disp_info).FirstOrDefault();
+      var s = summary.Reports.Where(x => x.BenchmarkCase.DisplayInfo == dispInfo).FirstOrDefault();
       double fps = nbFloat * 1000 / s.ResultStatistics.Min;
 
       return string.Format("{0,8:f2}", fps);
@@ -80,12 +80,12 @@ namespace csFastFloat.Benchmark
 
     public string GetValue(Summary summary, BenchmarkCase benchmarkCase, SummaryStyle style)
     {
-      var disp_info = benchmarkCase.DisplayInfo;
+      var dispInfo = benchmarkCase.DisplayInfo;
 
       var fileName = benchmarkCase.Parameters.Items.FirstOrDefault(x => x.Name == "FileName").ToString();
       var volume = new FileInfo(fileName).Length / 1024;
 
-      var s = summary.Reports.Where(x => x.BenchmarkCase.DisplayInfo == disp_info).FirstOrDefault();
+      var s = summary.Reports.Where(x => x.BenchmarkCase.DisplayInfo == dispInfo).FirstOrDefault();
       double vps = volume * 1000000 / s.ResultStatistics.Min;
 
       return string.Format("{0,8:f2}", vps);

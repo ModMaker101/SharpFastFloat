@@ -34,12 +34,12 @@ namespace csFastFloat
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static uint parse_eight_digits_unrolled(ulong val)
     {
-      const ulong mask = 0x000000FF000000FF;
-      const ulong mul1 = 0x000F424000000064; // 100 + (1000000ULL << 32)
-      const ulong mul2 = 0x0000271000000001; // 1 + (10000ULL << 32)
+      const ulong Mask = 0x000000FF000000FF;
+      const ulong Mul1 = 0x000F424000000064; // 100 + (1000000ULL << 32)
+      const ulong Mul2 = 0x0000271000000001; // 1 + (10000ULL << 32)
       val -= 0x3030303030303030;
       val = (val * 10) + (val >> 8); // val = (val * 2561) >> 8;
-      val = (((val & mask) * mul1) + (((val >> 16) & mask) * mul2)) >> 32;
+      val = (((val & Mask) * Mul1) + (((val >> 16) & Mask) * Mul2)) >> 32;
       return (uint)val;
     }
 
@@ -132,21 +132,21 @@ namespace csFastFloat
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static value128 compute_product_approximation(int bitPrecision, long q, ulong w)
     {
-      int index = 2 * (int)(q - CalculationConstants.smallest_power_of_five);
+      int index = 2 * (int)(q - CalculationConstants.SmallestPowerOfFive);
       // For small values of q, e.g., q in [0,27], the answer is always exact because
       // The line value128 firstproduct = full_multiplication(w, power_of_five_128[index]);
       // gives the exact answer.
       value128 firstproduct = FullMultiplication(w, CalculationConstants.get_power_of_five_128(index));
       //static_assert((bit_precision >= 0) && (bit_precision <= 64), " precision should  be in (0,64]");
-      ulong precision_mask = (bitPrecision < 64) ? ((ulong)(0xFFFFFFFFFFFFFFFF) >> bitPrecision) : (ulong)(0xFFFFFFFFFFFFFFFF);
-      if ((firstproduct.high & precision_mask) == precision_mask)
+      ulong precisionMask = (bitPrecision < 64) ? ((ulong)(0xFFFFFFFFFFFFFFFF) >> bitPrecision) : (ulong)(0xFFFFFFFFFFFFFFFF);
+      if ((firstproduct.High & precisionMask) == precisionMask)
       { // could further guard with  (lower + w < lower)
         // regarding the second product, we only need secondproduct.high, but our expectation is that the compiler will optimize this extra work away if needed.
         value128 secondproduct = FullMultiplication(w, CalculationConstants.get_power_of_five_128(index + 1));
-        firstproduct.low += secondproduct.high;
-        if (secondproduct.high > firstproduct.low)
+        firstproduct.Low += secondproduct.High;
+        if (secondproduct.High > firstproduct.Low)
         {
-          firstproduct.high++;
+          firstproduct.High++;
         }
       }
       return firstproduct;
@@ -238,23 +238,23 @@ namespace csFastFloat
 
     internal static bool strncasecmp(char* input1, char* input2, int length)
     {
-      int running_diff = 0;
+      int runningDiff = 0;
 
       for (int i = 0; i < length; i++)
       {
-        running_diff |= (input1[i] ^ input2[i]);
+        runningDiff |= (input1[i] ^ input2[i]);
       }
-      return (running_diff == 0) || (running_diff == 32);
+      return (runningDiff == 0) || (runningDiff == 32);
     }
     internal static bool strncasecmp(byte* input1, ReadOnlySpan<byte> input2, int length)
     {
-      int running_diff = 0;
+      int runningDiff = 0;
 
       for (int i = 0; i < length; i++)
       {
-        running_diff |= (input1[i] ^ input2[i]);
+        runningDiff |= (input1[i] ^ input2[i]);
       }
-      return (running_diff == 0) || (running_diff == 32);
+      return (runningDiff == 0) || (runningDiff == 32);
     }
 
 
@@ -347,9 +347,9 @@ namespace csFastFloat
       value = 0;
       Vector128<short> raw = Sse41.LoadDquVector128((short*)start);
       Vector128<short> ascii0 = Vector128.Create((short)(48 + short.MinValue));
-      Vector128<short> after_ascii9 = Vector128.Create((short)(short.MinValue + 9));
+      Vector128<short> afterAscii9 = Vector128.Create((short)(short.MinValue + 9));
       Vector128<short> a = Sse41.Subtract(raw, ascii0);
-      Vector128<short> b = Sse41.CompareLessThan(after_ascii9, a);
+      Vector128<short> b = Sse41.CompareLessThan(afterAscii9, a);
 
       if (!Sse41.TestZ(b, b))
       {

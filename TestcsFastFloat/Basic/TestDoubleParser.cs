@@ -169,7 +169,7 @@ namespace TestcsFastFloat.Tests.Basic
           char* pend = p + kv.Value.Length;
           var res = ParsedNumberString.ParseNumberString(p, pend);
 
-          sb.AppendLine($"Resultat : {res.exponent} {res.mantissa} {res.negative} {res.valid}");
+          sb.AppendLine($"Resultat : {res.Exponent} {res.Mantissa} {res.Negative} {res.Valid}");
           sb.AppendLine();
         }
       }
@@ -264,7 +264,7 @@ namespace TestcsFastFloat.Tests.Basic
         if (!d.HasValue)
           throw new ApplicationException($"Can't parse p=> {p}");
 
-        if (d != testing_power_of_ten[p + 307])
+        if (d != s_testingPowerOfTen[p + 307])
           throw new ApplicationException($"bad parsing p=> {p}");
       }
     }
@@ -285,7 +285,7 @@ namespace TestcsFastFloat.Tests.Basic
             throw new ApplicationException($"Can't parse p=> 1e{p}");
           }
 
-          double expected = ((p >= -307) ? testing_power_of_ten[p + 307] : Math.Pow(10, p));
+          double expected = ((p >= -307) ? s_testingPowerOfTen[p + 307] : Math.Pow(10, p));
           Assert.Equal(expected, d.Value);
         }
       }
@@ -375,7 +375,7 @@ namespace TestcsFastFloat.Tests.Basic
     {
       // European convention: '.' as thousands, ',' as decimal.
       var styles = NumberStyles.Float | NumberStyles.AllowThousands;
-      var ff = FastDoubleParser.ParseDouble("1.234.567,89", styles, decimal_separator: ',', thousands_separator: '.');
+      var ff = FastDoubleParser.ParseDouble("1.234.567,89", styles, decimalSeparator: ',', thousandsSeparator: '.');
       Assert.Equal(1234567.89, ff);
     }
 
@@ -392,7 +392,7 @@ namespace TestcsFastFloat.Tests.Basic
       }
     }
 
-    private static double[] testing_power_of_ten =  {
+    private static double[] s_testingPowerOfTen =  {
     1e-307, 1e-306, 1e-305, 1e-304, 1e-303, 1e-302, 1e-301, 1e-300, 1e-299,
     1e-298, 1e-297, 1e-296, 1e-295, 1e-294, 1e-293, 1e-292, 1e-291, 1e-290,
     1e-289, 1e-288, 1e-287, 1e-286, 1e-285, 1e-284, 1e-283, 1e-282, 1e-281,

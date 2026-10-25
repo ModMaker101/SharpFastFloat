@@ -89,7 +89,7 @@ namespace csFastFloat.Benchmark
           fixed (char* p = l)
           {
             var pni = ParsedNumberString.ParseNumberString(p, p + l.Length);
-            max = pni.exponent > max ? pni.exponent : max;
+            max = pni.Exponent > max ? pni.Exponent : max;
           }
 
 

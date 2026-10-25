@@ -105,19 +105,19 @@ foreach (string l in lines)
 
 Input strings are expected to be valid UTF-16.
 
-Trailing content in the string is ignored.  You may pass an optional `out int characters_consumed` parameter
-`FastDoubleParser.ParseDouble(l, out int characters_consumed)` if you wich to check how many characters were processed. Some users may want to fail when the number of characters consumed does not match the string length.
+Trailing content in the string is ignored.  You may pass an optional `out int charactersConsumed` parameter
+`FastDoubleParser.ParseDouble(l, out int charactersConsumed)` if you wich to check how many characters were processed. Some users may want to fail when the number of characters consumed does not match the string length.
 
 
 For UTF-8 or ASCII inputs, you may pass a `ReadOnlySpan<byte>` argument. You can also pass
-an optional `out int characters_consumed` parameter to track the number of characters consumed
+an optional `out int charactersConsumed` parameter to track the number of characters consumed
 by the number pattern.
 
 ## Thousands separators
 
 To match the behaviour of `Double.Parse` / `Single.Parse` on inputs such as `"1,234,567.89"`,
 pass `NumberStyles.AllowThousands`. The separator defaults to `,` and can be overridden via
-the optional `thousands_separator` parameter (e.g. for the European convention where the
+the optional `thousandsSeparator` parameter (e.g. for the European convention where the
 decimal separator is `,` and the thousands separator is `.`):
 
 ```C#
@@ -133,12 +133,12 @@ double a = FastDoubleParser.ParseDouble(
 double b = FastDoubleParser.ParseDouble(
     "1.234.567,89",
     NumberStyles.Float | NumberStyles.AllowThousands,
-    decimal_separator: ',',
-    thousands_separator: '.');                                        // 1234567.89
+    decimalSeparator: ',',
+    thousandsSeparator: '.');                                        // 1234567.89
 ```
 
 Without `AllowThousands`, the parser stops at the first separator (so `"1,234"` parses as
-`1` with `characters_consumed == 1`), preserving the prior default behaviour.
+`1` with `charactersConsumed == 1`), preserving the prior default behaviour.
 
 
 
@@ -152,6 +152,13 @@ A special thanks to [Egor Bogatov](https://github.com/EgorBo) and all contributo
 - Daniel Lemire, [Number Parsing at a Gigabyte per Second](https://arxiv.org/abs/2101.11408), [Software: Practice and Experience](https://onlinelibrary.wiley.com/doi/10.1002/spe.2984) 51 (8), 2021.
 
 ## Formatting and strict-parser benchmarks
+
+Variable names follow .NET conventions: camelCase locals and parameters,
+`_camelCase` private instance fields, `s_camelCase` private static fields, and
+PascalCase constants and exposed fields. These rules are configured in
+`.editorconfig`. Named argument callers should use `decimalSeparator`,
+`thousandsSeparator`, and `charactersConsumed`; the previous parameter names
+contained underscores. Positional calls and binary method signatures are unchanged.
 
 Formatting uses the repository `.editorconfig` and the .NET SDK formatter:
 

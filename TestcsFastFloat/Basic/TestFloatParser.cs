@@ -96,7 +96,7 @@ namespace TestcsFastFloat.Tests.Basic
         if (!f.HasValue)
           throw new ApplicationException($"Can't parse p=> {p}");
 
-        if (f != testing_power_of_ten_float[p + 65])
+        if (f != s_testingPowerOfTenFloat[p + 65])
           throw new ApplicationException($"bad parsing p=> {p}");
       }
     }
@@ -117,7 +117,7 @@ namespace TestcsFastFloat.Tests.Basic
             throw new ApplicationException($"Can't parse p=> 1e{p}");
           }
 
-          float expected = ((p >= -65) ? testing_power_of_ten_float[p + 65] : (float)Math.Pow(10, p));
+          float expected = ((p >= -65) ? s_testingPowerOfTenFloat[p + 65] : (float)Math.Pow(10, p));
           Assert.Equal(expected, f.Value);
         }
       }
@@ -165,7 +165,7 @@ namespace TestcsFastFloat.Tests.Basic
           char* pend = p + kv.Value.Length;
           var res = ParsedNumberString.ParseNumberString(p, pend);
 
-          sb.AppendLine($"Resultat : {res.exponent} {res.mantissa} {res.negative} {res.valid}");
+          sb.AppendLine($"Resultat : {res.Exponent} {res.Mantissa} {res.Negative} {res.Valid}");
           sb.AppendLine();
         }
       }
@@ -356,7 +356,7 @@ namespace TestcsFastFloat.Tests.Basic
     {
       // European convention: '.' as thousands, ',' as decimal.
       var styles = NumberStyles.Float | NumberStyles.AllowThousands;
-      var ff = FastFloatParser.ParseFloat("1.234.567,89", styles, decimal_separator: ',', thousands_separator: '.');
+      var ff = FastFloatParser.ParseFloat("1.234.567,89", styles, decimalSeparator: ',', thousandsSeparator: '.');
       Assert.Equal(1234567.89f, ff);
     }
 
@@ -381,7 +381,7 @@ namespace TestcsFastFloat.Tests.Basic
       Assert.Equal(1, consumed);
     }
 
-    private static float[] testing_power_of_ten_float =  {
+    private static float[] s_testingPowerOfTenFloat =  {
     1e-65F,
     1e-64F,  1e-63F,  1e-62F,  1e-61F,  1e-60F,  1e-59F,  1e-58F,  1e-57F,  1e-56F,
     1e-55F,  1e-54F,  1e-53F,  1e-52F,  1e-51F,  1e-50F,  1e-49F,  1e-48F,  1e-47F,

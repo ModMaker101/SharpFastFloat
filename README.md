@@ -1,10 +1,19 @@
-# csFastFloat : a fast and accurate float parser
-[![.NET](https://github.com/CarlVerret/csFastFloat/actions/workflows/dotnet.yml/badge.svg)](https://github.com/CarlVerret/csFastFloat/actions/workflows/dotnet.yml)
+# SharpFastFloat : a fast and accurate float parser
+[![.NET](https://github.com/ModMaker101/SharpFastFloat/actions/workflows/dotnet.yml/badge.svg)](https://github.com/ModMaker101/SharpFastFloat/actions/workflows/dotnet.yml)
 
-C# port of Daniel Lemire's [fast_float](https://github.com/fastfloat/fast_float) fully ported from C++ to C#. In older versions (5.0 and under) it is up to 9 times faster than the standard library in some cases while providing exact results. An important portion of our work had been merged to .NET Runtime within version 7.0 of the .NET Framework. Yet the csFastFloat library remains substantially faster (e.g., 3 or 4 times faster) than the .NET Runtime in some instances.
+SharpFastFloat is a performance-focused fork of [csFastFloat](https://github.com/CarlVerret/csFastFloat),
+derived from Daniel Lemire and the [fast_float authors' C++ library](https://github.com/fastfloat/fast_float).
+It provides correctly rounded float and double parsing for UTF-16 and UTF-8,
+strict decimal APIs, SIMD scanning on x64/ARM, and stack-backed exact midpoint rounding.
 
-The csFastFloat library is used by [Sep](https://github.com/nietras/Sep) which might be
-the  World's Fastest .NET CSV Parser.
+The original csFastFloat library is used by [Sep](https://github.com/nietras/Sep).
+Historical upstream benchmark results are retained below; later sections document
+measurements and improvements made in this fork.
+
+To migrate from csFastFloat, reference the `SharpFastFloat` package/project and
+replace `using csFastFloat;` with `using SharpFastFloat;`. The assembly and namespace
+have changed, so consumers must rebuild. Parser class and method names are retained.
+The solution is now `SharpFastFloat.sln`.
 
 # Benchmarks
 
@@ -53,7 +62,7 @@ dotnet test -f net9.0
 ```
 If you omit the target framework and you don't have both .net 8.0 and dotnetcore 3.1 SDKs installed you may experience an error when building or running tests.
 
-The set of unit tests in /TestcsFastFloat project combines unit tests from many libraries.  It includes tests used by the Go Team.
+The set of unit tests in /SharpFastFloat.Tests project combines unit tests from many libraries.  It includes tests used by the Go Team.
 Additional info on Nigel Tao's work can be found [here](https://nigeltao.github.io/blog/2020/eisel-lemire.html#testing).  It also include strtod test file that can be found [here](https://github.com/ahrvoje/numerics/blob/master/strtod/strtod_tests.toml).
 
 
@@ -100,7 +109,7 @@ Two functions are available: `FastDoubleParser.ParseDouble` and `FastFloatParser
 `String`, `char *`  and `ReadOnlySpan<char>` are supported inputs.
 
 ```C#
-using csFastFloat;
+using SharpFastFloat;
 
 
 double x;
@@ -135,7 +144,7 @@ decimal separator is `,` and the thousands separator is `.`):
 
 ```C#
 using System.Globalization;
-using csFastFloat;
+using SharpFastFloat;
 
 // Invariant culture: "," as thousands, "." as decimal.
 double a = FastDoubleParser.ParseDouble(
@@ -176,8 +185,8 @@ contained underscores. Positional calls and binary method signatures are unchang
 Formatting uses the repository `.editorconfig` and the .NET SDK formatter:
 
 ```sh
-dotnet format csFastFloat.sln
-dotnet format csFastFloat.sln --verify-no-changes
+dotnet format SharpFastFloat.sln
+dotnet format SharpFastFloat.sln --verify-no-changes
 ```
 
 CI checks formatting and runs strict and regular scanner tests on x64 and ARM64 with hardware
@@ -185,7 +194,7 @@ intrinsics both enabled and disabled. Run the end-to-end and digit-run benchmark
 (including scalar, four-digit, and eight-digit accumulation) with:
 
 ```sh
-dotnet run -c Release --project Benchmark -- --filter '*StrictParserBenchmark*' '*DigitChunkBenchmark*' --job short
+dotnet run -c Release --project SharpFastFloat.Benchmarks -- --filter '*StrictParserBenchmark*' '*DigitChunkBenchmark*' --job short
 ```
 
 A short BenchmarkDotNet run on an AMD EPYC 9V74, Debian 13, .NET 9.0.21
@@ -235,7 +244,7 @@ The dedicated benchmark covers short integers, chunk boundaries, long integers,
 grouping, fractions, exponents, and trailing text in all four API paths:
 
 ```sh
-dotnet run -c Release --project Benchmark -- --filter '*RegularScannerBenchmark*' --job short --warmupCount 3 --iterationCount 5 --iterationTime 100 --launchCount 1
+dotnet run -c Release --project SharpFastFloat.Benchmarks -- --filter '*RegularScannerBenchmark*' --job short --warmupCount 3 --iterationCount 5 --iterationTime 100 --launchCount 1
 ```
 
 Before/after means on AMD EPYC 9V74, Debian 13, .NET 9.0.21, using the same harness
@@ -274,7 +283,7 @@ Run the short-input/zero-tail before-and-after harness and the four-entry-point
 comparison (which also includes the configurable parsers) with:
 
 ```sh
-dotnet run -c Release --project Benchmark -- --filter '*StrictDoubleScannerBenchmark*' '*StrictEntryPointsBenchmark*' --job short --warmupCount 3 --iterationCount 5 --iterationTime 200 --launchCount 1
+dotnet run -c Release --project SharpFastFloat.Benchmarks -- --filter '*StrictDoubleScannerBenchmark*' '*StrictEntryPointsBenchmark*' --job short --warmupCount 3 --iterationCount 5 --iterationTime 200 --launchCount 1
 ```
 
 Measured means on AMD EPYC 9V74, Debian 13, .NET 9.0.21, with scanner commit
@@ -342,7 +351,7 @@ CI includes these tests on x64/ARM64 with intrinsics enabled and disabled.
 Run the midpoint benchmarks with:
 
 ```sh
-dotnet run -c Release --project Benchmark -- --filter '*MidpointRoundingBenchmark*' --job short --warmupCount 3 --iterationCount 5 --iterationTime 100 --launchCount 1
+dotnet run -c Release --project SharpFastFloat.Benchmarks -- --filter '*MidpointRoundingBenchmark*' --job short --warmupCount 3 --iterationCount 5 --iterationTime 100 --launchCount 1
 ```
 
 Before/after BenchmarkDotNet means on AMD EPYC 9V74, Debian 13, .NET 9.0.21,

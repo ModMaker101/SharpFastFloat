@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+<PropertyGroup>
+    <TargetFrameworks>net9.0;net8.0;net5.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
+    <Authors>ModMaker101;Carl Verret</Authors>
+    <PackageId>SharpFastFloat</PackageId>
+    <AssemblyName>SharpFastFloat</AssemblyName>
+    <RootNamespace>SharpFastFloat</RootNamespace>
+    <Description>A performance-focused fork of csFastFloat, derived from fast_float. Correctly rounded float and double parsing for UTF-16 and UTF-8, with strict decimal APIs and SIMD scanning.</Description>
+    <Copyright>MIT licensed; includes work by the csFastFloat and fast_float authors.</Copyright>
+    <PackageProjectUrl>https://github.com/ModMaker101/SharpFastFloat</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ModMaker101/SharpFastFloat</RepositoryUrl>
+    <PackageTags>C# Double Float Parsing</PackageTags>
+	  <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <AssemblyVersion>4.1.5.0</AssemblyVersion>
+    <FileVersion>4.1.5.0</FileVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Title>SharpFastFloat : a fast and accurate float parser</Title>
+
+    <LangVersion>9</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Version>4.1.5</Version>
+
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)'!='netstandard2.0'">
+    <DefineConstants>$(DefineConstants);HAS_BITOPERATIONS;HAS_INTRINSICS</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DocumentationFile>bin\Release\$(TargetFramework)\SharpFastFloat.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
+    <PackageReference Include="System.Memory" Version="4.6.0" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Enums\**" />
+    <EmbeddedResource Remove="Enums\**" />
+    <None Remove="Enums\**" />
+    <None Include="docs\readme.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

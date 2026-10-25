@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SharpFastFloat.BenchmarkHandCoded": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}

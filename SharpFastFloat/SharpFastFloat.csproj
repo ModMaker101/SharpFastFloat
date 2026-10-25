@@ -11,7 +11,7 @@
     <PackageProjectUrl>https://github.com/ModMaker101/SharpFastFloat</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ModMaker101/SharpFastFloat</RepositoryUrl>
     <PackageTags>C# Double Float Parsing</PackageTags>
-	  <PackageReadmeFile>readme.md</PackageReadmeFile>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
     <AssemblyVersion>0.1.0.0</AssemblyVersion>
     <FileVersion>0.1.0.0</FileVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -45,6 +45,6 @@
     <Compile Remove="Enums\**" />
     <EmbeddedResource Remove="Enums\**" />
     <None Remove="Enums\**" />
-    <None Include="docs\readme.md" Pack="true" PackagePath="\" />
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

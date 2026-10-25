@@ -6,7 +6,7 @@
     <PackageId>SharpFastFloat</PackageId>
     <AssemblyName>SharpFastFloat</AssemblyName>
     <RootNamespace>SharpFastFloat</RootNamespace>
-    <Description>A performance-focused fork of csFastFloat, derived from fast_float. Correctly rounded float and double parsing for UTF-16 and UTF-8, with strict decimal APIs and SIMD scanning.</Description>
+    <Description>Fast, correctly rounded float and double parsing for .NET, with UTF-16 and UTF-8 span APIs, strict decimal parsing, SIMD scanning, and exact midpoint rounding.</Description>
     <Copyright>MIT licensed; includes work by the csFastFloat and fast_float authors.</Copyright>
     <PackageProjectUrl>https://github.com/ModMaker101/SharpFastFloat</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ModMaker101/SharpFastFloat</RepositoryUrl>

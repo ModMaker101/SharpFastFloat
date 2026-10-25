@@ -12,15 +12,15 @@
     <RepositoryUrl>https://github.com/ModMaker101/SharpFastFloat</RepositoryUrl>
     <PackageTags>C# Double Float Parsing</PackageTags>
 	  <PackageReadmeFile>readme.md</PackageReadmeFile>
-    <AssemblyVersion>4.1.5.0</AssemblyVersion>
-    <FileVersion>4.1.5.0</FileVersion>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Title>SharpFastFloat : a fast and accurate float parser</Title>
 
     <LangVersion>9</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>4.1.5</Version>
+    <Version>0.1.0-preview.1</Version>
 
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>

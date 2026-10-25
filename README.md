@@ -387,11 +387,11 @@ an environment restriction.
 After merging the release changes, tag the intended commit and push the tag:
 
 ```sh
-git tag v4.1.6
-git push origin v4.1.6
+git tag v0.1.0-preview.1
+git push origin v0.1.0-preview.1
 ```
 
-Use a new version for each release; prerelease tags such as `v4.1.6-preview.1` are
+Use a new version for each release; prerelease tags such as `v0.1.0-preview.2` are
 also supported. The tag supplies the package version, overriding the development
 version in the project file. The workflow restores, checks formatting, builds all
 targets, runs the .NET 8 and .NET 9 test suites, and packs the library before

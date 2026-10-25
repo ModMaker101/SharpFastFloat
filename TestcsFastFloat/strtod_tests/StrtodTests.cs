@@ -10,7 +10,7 @@ namespace TestcsFastFloat.suppl_tests
 {
 
 
-  public class Strtod_tests : BaseTestClass
+  public class StrtodTests : BaseTestClass
   {
 
 #if NET8_0
@@ -29,7 +29,7 @@ namespace TestcsFastFloat.suppl_tests
     /// https://github.com/ahrvoje/numerics/blob/master/strtod/strtod_tests.toml
     /// </summary>
     [SkippableFact]
-    void strtod_tests_file()
+    void StrtodTestsFile()
     {
       Skip.If(base.NoDiffToolDetected(), "No diff tool detected");
 

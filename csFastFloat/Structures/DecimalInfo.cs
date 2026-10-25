@@ -32,7 +32,7 @@ namespace csFastFloat.Structures
       return sb.ToString();
     }
 
-    internal void trim()
+    internal void Trim()
     {
       while ((NumDigits > 0) && (Digits[NumDigits - 1] == 0))
       {
@@ -40,7 +40,7 @@ namespace csFastFloat.Structures
       }
     }
 
-    private static ushort get_number_of_digits_decimal_left_shift(int shift)
+    private static ushort GetNumberOfDigitsDecimalLeftShift(int shift)
     {
 #if NET5_0_OR_GREATER
       Debug.Assert(shift < s_numberOfDigitsDecimalLeftShiftTable.Length);
@@ -62,7 +62,7 @@ namespace csFastFloat.Structures
         0x051C, 0x051C
     };
 
-    private static byte number_of_digits_decimal_left_shift_table_powers_of_5(int index)
+    private static byte NumberOfDigitsDecimalLeftShiftTablePowersOf5(int index)
     {
       Debug.Assert(index < number_of_digits_decimal_left_shift_table_powers_of_5_table.Length);
       ref byte tableRef = ref MemoryMarshal.GetReference(number_of_digits_decimal_left_shift_table_powers_of_5_table);
@@ -128,11 +128,11 @@ namespace csFastFloat.Structures
     };
 
 
-    private uint number_of_digits_decimal_left_shift(int shift)
+    private uint NumberOfDigitsDecimalLeftShift(int shift)
     {
       shift &= 63;
-      uint xa = get_number_of_digits_decimal_left_shift(shift);
-      uint xb = get_number_of_digits_decimal_left_shift(shift + 1);
+      uint xa = GetNumberOfDigitsDecimalLeftShift(shift);
+      uint xb = GetNumberOfDigitsDecimalLeftShift(shift + 1);
       uint numNewDigits = xa >> 11;
       uint pow5A = 0x7FF & xa;
       uint pow5B = 0x7FF & xb;
@@ -146,11 +146,11 @@ namespace csFastFloat.Structures
         {
           return numNewDigits - 1;
         }
-        else if (Digits[i] == number_of_digits_decimal_left_shift_table_powers_of_5((int)(pow5A + i)))
+        else if (Digits[i] == NumberOfDigitsDecimalLeftShiftTablePowersOf5((int)(pow5A + i)))
         {
           continue;
         }
-        else if (Digits[i] < number_of_digits_decimal_left_shift_table_powers_of_5((int)(pow5A + i)))
+        else if (Digits[i] < NumberOfDigitsDecimalLeftShiftTablePowersOf5((int)(pow5A + i)))
         {
           return numNewDigits - 1;
         }
@@ -162,7 +162,7 @@ namespace csFastFloat.Structures
       return numNewDigits;
     }
 
-    internal ulong round()
+    internal ulong Round()
     {
       if ((NumDigits == 0) || (DecimalPoint < 0))
       {
@@ -197,13 +197,13 @@ namespace csFastFloat.Structures
     }
 
     // computes h * 2^-shift
-    internal void decimal_left_shift(int shift)
+    internal void DecimalLeftShift(int shift)
     {
       if (NumDigits == 0)
       {
         return;
       }
-      uint numNewDigits = number_of_digits_decimal_left_shift(shift);
+      uint numNewDigits = NumberOfDigitsDecimalLeftShift(shift);
 
       int readIndex = (int)(NumDigits - 1);
       uint writeIndex = NumDigits - 1 + numNewDigits;
@@ -247,11 +247,11 @@ namespace csFastFloat.Structures
         NumDigits = CalculationConstants.MaxDigits;
       }
       DecimalPoint += (int)(numNewDigits);
-      trim();
+      Trim();
     }
 
     // computes h * 2^shift
-    internal void decimal_right_shift(int shift)
+    internal void DecimalRightShift(int shift)
     {
       uint readIndex = 0;
       uint writeIndex = 0;
@@ -308,11 +308,11 @@ namespace csFastFloat.Structures
         }
       }
       NumDigits = writeIndex;
-      trim();
+      Trim();
     }
 
     // UTF-16 inputs
-    unsafe internal static DecimalInfo parse_decimal(char* p, char* pend, char decimalSeparator)
+    unsafe internal static DecimalInfo ParseDecimal(char* p, char* pend, char decimalSeparator)
     {
       DecimalInfo answer = new DecimalInfo() { Negative = (*p == '-') };
 
@@ -325,7 +325,7 @@ namespace csFastFloat.Structures
       {
         ++p;
       }
-      while ((p != pend) && Utils.is_integer(*p, out uint cMinus0))
+      while ((p != pend) && Utils.IsInteger(*p, out uint cMinus0))
       {
         if (answer.NumDigits < CalculationConstants.MaxDigits)
         {
@@ -347,7 +347,7 @@ namespace csFastFloat.Structures
             ++p;
           }
         }
-        while ((p != pend) && Utils.is_integer(*p, out uint cMinus0))
+        while ((p != pend) && Utils.IsInteger(*p, out uint cMinus0))
         {
           if (answer.NumDigits < CalculationConstants.MaxDigits)
           {
@@ -396,7 +396,7 @@ namespace csFastFloat.Structures
           ++p;
         }
         long expNumber = 0; // exponential part
-        while ((p != pend) && Utils.is_integer(*p, out uint cMinus0))
+        while ((p != pend) && Utils.IsInteger(*p, out uint cMinus0))
         {
           byte digit = (byte)cMinus0;
           if (expNumber < (long)int.MaxValue + 400)
@@ -416,7 +416,7 @@ namespace csFastFloat.Structures
     }
 
     // UTF-8/ASCII inputs
-    unsafe internal static DecimalInfo parse_decimal(byte* p, byte* pend, byte decimalSeparator)
+    unsafe internal static DecimalInfo ParseDecimal(byte* p, byte* pend, byte decimalSeparator)
     {
       DecimalInfo answer = new DecimalInfo() { Negative = (*p == '-') };
 
@@ -429,7 +429,7 @@ namespace csFastFloat.Structures
       {
         ++p;
       }
-      while ((p != pend) && Utils.is_integer(*p, out uint digit))
+      while ((p != pend) && Utils.IsInteger(*p, out uint digit))
       {
         if (answer.NumDigits < CalculationConstants.MaxDigits)
         {
@@ -451,7 +451,7 @@ namespace csFastFloat.Structures
             ++p;
           }
         }
-        while ((p != pend) && Utils.is_integer(*p, out uint digit))
+        while ((p != pend) && Utils.IsInteger(*p, out uint digit))
         {
           if (answer.NumDigits < CalculationConstants.MaxDigits)
           {
@@ -500,7 +500,7 @@ namespace csFastFloat.Structures
           ++p;
         }
         long expNumber = 0; // exponential part
-        while ((p != pend) && Utils.is_integer(*p, out uint digit))
+        while ((p != pend) && Utils.IsInteger(*p, out uint digit))
         {
           if (expNumber < (long)int.MaxValue + 400)
           {

@@ -23,7 +23,7 @@ namespace csFastFloat
       // A one-character decimal token can only be an ASCII digit.
       if (s.Length == 1)
       {
-        if (!Utils.is_integer(s[0], out uint digit)) { return false; }
+        if (!Utils.IsInteger(s[0], out uint digit)) { return false; }
         result = digit;
         return true;
       }
@@ -58,7 +58,7 @@ namespace csFastFloat
       // A one-character decimal token can only be an ASCII digit.
       if (s.Length == 1)
       {
-        if (!Utils.is_integer(s[0], out uint digit)) { return false; }
+        if (!Utils.IsInteger(s[0], out uint digit)) { return false; }
         result = digit;
         return true;
       }

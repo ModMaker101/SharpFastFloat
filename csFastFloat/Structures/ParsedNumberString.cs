@@ -31,7 +31,7 @@ namespace csFastFloat.Structures
         {
           return answer;
         }
-        if (!Utils.is_integer(*p, out uint _) && (*p != decimalSeparator)) // culture info ?
+        if (!Utils.IsInteger(*p, out uint _) && (*p != decimalSeparator)) // culture info ?
         { // a  sign must be followed by an integer or the dot
           return answer;
         }
@@ -57,7 +57,7 @@ namespace csFastFloat.Structures
           i = i * 100000000 + chunk;
           p += 8;
         }
-        while (p != pend && Utils.is_integer(*p, out uint digit))
+        while (p != pend && Utils.IsInteger(*p, out uint digit))
         {
           i = i * 10 + digit;
           ++p;
@@ -68,7 +68,7 @@ namespace csFastFloat.Structures
       {
         while (p != pend)
         {
-          if (Utils.is_integer(*p, out uint cMinus0))
+          if (Utils.IsInteger(*p, out uint cMinus0))
           {
             // a multiplication by 10 is cheaper than an arbitrary integer
             // multiplication
@@ -78,7 +78,7 @@ namespace csFastFloat.Structures
           }
           else if (allowThousands && *p == thousandsSeparator
                    && integerDigitCount > 0
-                   && (p + 1) != pend && Utils.is_integer(*(p + 1), out uint _))
+                   && (p + 1) != pend && Utils.IsInteger(*(p + 1), out uint _))
           {
             ++p; // skip a thousands separator that lies strictly between digits
           }
@@ -98,7 +98,7 @@ namespace csFastFloat.Structures
 
 
 #if HAS_INTRINSICS
-        while ((p <= pend - 8) && Utils.TryParseEightConsecutiveDigits_SIMD(p, out uint tmp))
+        while ((p <= pend - 8) && Utils.TryParseEightConsecutiveDigitsSIMD(p, out uint tmp))
         {
           i = i * 100000000 + tmp;
           p += 8;
@@ -106,7 +106,7 @@ namespace csFastFloat.Structures
 #endif
 
 
-        while ((p != pend) && Utils.is_integer(*p, out uint cMinus0))
+        while ((p != pend) && Utils.IsInteger(*p, out uint cMinus0))
         {
           byte digit = (byte)cMinus0;
           ++p;
@@ -136,7 +136,7 @@ namespace csFastFloat.Structures
         {
           ++p;
         }
-        if ((p == pend) || !Utils.is_integer(*p, out uint _))
+        if ((p == pend) || !Utils.IsInteger(*p, out uint _))
         {
           if (expectedFormat != NumberStyles.AllowDecimalPoint) // ce n'est pas ça !
           {
@@ -148,7 +148,7 @@ namespace csFastFloat.Structures
         }
         else
         {
-          while ((p != pend) && Utils.is_integer(*p, out uint cMinus0))
+          while ((p != pend) && Utils.IsInteger(*p, out uint cMinus0))
           {
             byte digit = (byte)cMinus0;
             if (expNumber < 0x10000)
@@ -196,7 +196,7 @@ namespace csFastFloat.Structures
           const ulong MinimalNineteenDigitInteger = 1000000000000000000;
           while ((i < MinimalNineteenDigitInteger) && (p != pend))
           {
-            if (Utils.is_integer(*p, out uint cMinus0))
+            if (Utils.IsInteger(*p, out uint cMinus0))
             {
               i = i * 10 + (ulong)cMinus0;
               ++p;
@@ -216,7 +216,7 @@ namespace csFastFloat.Structures
           { // We have a value with a fractional component.
             p++; // skip the '.'
             char* firstAfterPeriod = p;
-            while ((i < MinimalNineteenDigitInteger) && (p != pend) && Utils.is_integer(*p, out uint cMinus0))
+            while ((i < MinimalNineteenDigitInteger) && (p != pend) && Utils.IsInteger(*p, out uint cMinus0))
             {
               i = i * 10 + (ulong)cMinus0;
               ++p;
@@ -247,7 +247,7 @@ namespace csFastFloat.Structures
         {
           return answer;
         }
-        if (!Utils.is_integer(*p, out uint _) && (*p != decimalSeparator))
+        if (!Utils.IsInteger(*p, out uint _) && (*p != decimalSeparator))
         { // a  sign must be followed by an integer or the dot
           return answer;
         }
@@ -268,12 +268,12 @@ namespace csFastFloat.Structures
       // counter or group-separator checks.
       if (!allowThousands && pend - p >= 8)
       {
-        while (pend - p >= 8 && Utils.is_made_of_eight_digits_fast(p))
+        while (pend - p >= 8 && Utils.IsMadeOfEightDigitsFast(p))
         {
-          i = i * 100000000 + Utils.parse_eight_digits_unrolled(p);
+          i = i * 100000000 + Utils.ParseEightDigitsUnrolled(p);
           p += 8;
         }
-        while (p != pend && Utils.is_integer(*p, out uint digit))
+        while (p != pend && Utils.IsInteger(*p, out uint digit))
         {
           i = i * 10 + digit;
           ++p;
@@ -284,7 +284,7 @@ namespace csFastFloat.Structures
       {
         while (p != pend)
         {
-          if (Utils.is_integer(*p, out uint digit))
+          if (Utils.IsInteger(*p, out uint digit))
           {
             // a multiplication by 10 is cheaper than an arbitrary integer
             // multiplication
@@ -294,7 +294,7 @@ namespace csFastFloat.Structures
           }
           else if (allowThousands && *p == thousandsSeparator
                    && integerDigitCount > 0
-                   && (p + 1) != pend && Utils.is_integer(*(p + 1), out uint _))
+                   && (p + 1) != pend && Utils.IsInteger(*(p + 1), out uint _))
           {
             ++p; // skip a thousands separator that lies strictly between digits
           }
@@ -310,17 +310,17 @@ namespace csFastFloat.Structures
       if ((p != pend) && (*p == decimalSeparator))
       {
         ++p;
-        if ((p + 8 <= pend) && Utils.is_made_of_eight_digits_fast(p))
+        if ((p + 8 <= pend) && Utils.IsMadeOfEightDigitsFast(p))
         {
-          i = i * 100000000 + Utils.parse_eight_digits_unrolled(p);
+          i = i * 100000000 + Utils.ParseEightDigitsUnrolled(p);
           p += 8;
-          if ((p + 8 <= pend) && Utils.is_made_of_eight_digits_fast(p))
+          if ((p + 8 <= pend) && Utils.IsMadeOfEightDigitsFast(p))
           {
-            i = i * 100000000 + Utils.parse_eight_digits_unrolled(p);
+            i = i * 100000000 + Utils.ParseEightDigitsUnrolled(p);
             p += 8;
           }
         }
-        while ((p != pend) && Utils.is_integer(*p, out uint digit))
+        while ((p != pend) && Utils.IsInteger(*p, out uint digit))
         {
           ++p;
           i = i * 10 + digit; // in rare cases, this will overflow, but that's ok
@@ -348,7 +348,7 @@ namespace csFastFloat.Structures
         {
           ++p;
         }
-        if ((p == pend) || !Utils.is_integer(*p, out uint _))
+        if ((p == pend) || !Utils.IsInteger(*p, out uint _))
         {
           if (!expectedFormat.IsSet(NumberStyles.AllowDecimalPoint))
           {
@@ -360,7 +360,7 @@ namespace csFastFloat.Structures
         }
         else
         {
-          while ((p != pend) && Utils.is_integer(*p, out uint cdigit))
+          while ((p != pend) && Utils.IsInteger(*p, out uint cdigit))
           {
             if (expNumber < 0x10000)
             {
@@ -407,7 +407,7 @@ namespace csFastFloat.Structures
           const ulong MinimalNineteenDigitInteger = 1000000000000000000;
           while ((i < MinimalNineteenDigitInteger) && (p != pend))
           {
-            if (Utils.is_integer(*p, out uint digit))
+            if (Utils.IsInteger(*p, out uint digit))
             {
               i = i * 10 + digit;
               ++p;
@@ -427,7 +427,7 @@ namespace csFastFloat.Structures
           { // We have a value with a fractional component.
             p++; // skip the '.'
             byte* firstAfterPeriod = p;
-            while ((i < MinimalNineteenDigitInteger) && (p != pend) && Utils.is_integer(*p, out uint digit))
+            while ((i < MinimalNineteenDigitInteger) && (p != pend) && Utils.IsInteger(*p, out uint digit))
             {
               i = i * 10 + digit;
               ++p;

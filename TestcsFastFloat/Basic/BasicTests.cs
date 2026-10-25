@@ -25,7 +25,7 @@ namespace TestcsFastFloat.Tests.Basic
   public class BasicTests : BaseTestClass
   {
     [Fact]
-    private void issue13()
+    private void Issue13()
     {
       double? x = FastDoubleParser.ParseDouble("0");
       Assert.True(x.HasValue, "Parsed");
@@ -33,7 +33,7 @@ namespace TestcsFastFloat.Tests.Basic
     }
 
     [Fact]
-    private void issue32()
+    private void Issue32()
     {
       double? x = FastDoubleParser.ParseDouble("-0");
       Assert.True(x.HasValue, "could not parse -zero.");
@@ -41,7 +41,7 @@ namespace TestcsFastFloat.Tests.Basic
     }
 
     [Fact]
-    private void issue23()
+    private void Issue23()
     {
       double? x = FastDoubleParser.ParseDouble("0e+42949672970");
 
@@ -50,7 +50,7 @@ namespace TestcsFastFloat.Tests.Basic
     }
 
     [Fact]
-    private void issue23_2()
+    private void Issue232()
     {
       double? x = FastDoubleParser.ParseDouble("5e0012");
 
@@ -84,7 +84,7 @@ namespace TestcsFastFloat.Tests.Basic
     [InlineData(1ul << 63, 1ul << 2, 0ul, 2ul)]
     [InlineData(1ul << 63, 1ul << 63, 0ul, 1ul << 62)]
     [Theory]
-    private void FullMultiplication_Works(ulong lhs, ulong rhs, ulong expectedLow, ulong expectedHigh)
+    private void FullMultiplicationWorks(ulong lhs, ulong rhs, ulong expectedLow, ulong expectedHigh)
     {
       // Inconclusive :(
       value128 res = Utils.FullMultiplication(lhs, rhs);
@@ -117,12 +117,12 @@ namespace TestcsFastFloat.Tests.Basic
 
 
     [Fact]
-    private void ScientificFails_when_InconsistentInput()
+    private void ScientificFailsWhenInconsistentInput()
     {
       Assert.Throws<System.ArgumentException>(() => FastDoubleParser.ParseDouble("3.14", NumberStyles.AllowExponent));
     }
     [Fact]
-    unsafe private void Multiples_decimal_separators_works()
+    unsafe private void MultiplesDecimalSeparatorsWorks()
     {
       Assert.Equal(FastDoubleParser.ParseDouble("3.14", decimalSeparator: '.'), FastDoubleParser.ParseDouble("3,14", decimalSeparator: ','));
       Assert.Equal(FastFloatParser.ParseFloat("3.14", decimalSeparator: '.'), FastFloatParser.ParseFloat("3,14", decimalSeparator: ','));
@@ -149,13 +149,13 @@ namespace TestcsFastFloat.Tests.Basic
 
 
     [Fact]
-    private void ScientificWorks_when_ConsistentInput()
+    private void ScientificWorksWhenConsistentInput()
     {
       Assert.Equal(3.14e10, FastDoubleParser.ParseDouble("3.14e10", NumberStyles.AllowExponent));
     }
 
     [Fact]
-    private void FixedWorks_when_ConsistentInput()
+    private void FixedWorksWhenConsistentInput()
     {
       Assert.Equal(3.14, FastDoubleParser.ParseDouble("3.14e10", NumberStyles.AllowDecimalPoint));
     }
@@ -180,7 +180,7 @@ namespace TestcsFastFloat.Tests.Basic
     [InlineData("2e3000", double.PositiveInfinity)]
     [InlineData("1.9e308", double.PositiveInfinity)]
     [Theory]
-    private void TestInfinity_Double(string sut, double expectedValue)
+    private void TestInfinityDouble(string sut, double expectedValue)
     {
       Assert.Equal(expectedValue, FastDoubleParser.ParseDouble(sut));
     }
@@ -238,7 +238,7 @@ namespace TestcsFastFloat.Tests.Basic
     [InlineData("1.7976931348623158e308", 1.7976931348623157e+308)] // 0x1.fffffffffffffp + 1023)]
     [InlineData("9007199254740993.0", 9007199254740992.0)] // 0x1p53)]
     [Theory]
-    private void TestGeneral_Double(string sut, double expectedValue)
+    private void TestGeneralDouble(string sut, double expectedValue)
     {
       Assert.Equal(expectedValue, FastDoubleParser.ParseDouble(sut));
       Assert.Equal(expectedValue, FastDoubleParser.ParseDouble(sut.AsSpan()));
@@ -248,7 +248,7 @@ namespace TestcsFastFloat.Tests.Basic
 
     [InlineData("2.22507385850720212418870147920222032907240528279439037814303133837435107319244194686754406432563881851382188218502438069999947733013005649884107791928741341929297200970481951993067993290969042784064731682041565926728632933630474670123316852983422152744517260835859654566319282835244787787799894310779783833699159288594555213714181128458251145584319223079897504395086859412457230891738946169368372321191373658977977723286698840356390251044443035457396733706583981055420456693824658413747607155981176573877626747665912387199931904006317334709003012790188175203447190250028061277777916798391090578584006464715943810511489154282775041174682194133952466682503431306181587829379004205392375072083366693241580002758391118854188641513168478436313080237596295773983001708984375e-308", 2.2250738585072024e-308)]//0x1.0000000000002p-1022
     [Theory]
-    private void TestGeneral_Double_2(string sut, double expectedValue)
+    private void TestGeneralDouble2(string sut, double expectedValue)
     {
       Assert.Equal(expectedValue, FastDoubleParser.ParseDouble(sut));
       Assert.Equal(expectedValue, FastDoubleParser.ParseDouble(sut.AsSpan()));
@@ -263,7 +263,7 @@ namespace TestcsFastFloat.Tests.Basic
     [InlineData("1.1754941406275178592461758986628081843312458647327962400313859427181746759860647699724722770042717456817626953125", 656, "e-38", 1.1754941E-38)]
     [InlineData("1.1754941406275178592461758986628081843312458647327962400313859427181746759860647699724722770042717456817626953125", 1000, "e-38", 1.1754941E-38)]
     [Theory]
-    private void TestGeneral_Float_appendZeros(string sut, int zeros, string exp, float expectedValue) => Assert.Equal(expectedValue, FastFloatParser.ParseFloat(sut.PadRight(zeros, '0') + exp));
+    private void TestGeneralFloatAppendZeros(string sut, int zeros, string exp, float expectedValue) => Assert.Equal(expectedValue, FastFloatParser.ParseFloat(sut.PadRight(zeros, '0') + exp));
     // //verify32(1.00000006e+09f)]
     ////verify32(1.4012984643e-45f)]
     ////verify32(1.1754942107e-38f)]
@@ -330,7 +330,7 @@ namespace TestcsFastFloat.Tests.Basic
     [InlineData("0.00000000000000000000000000000000000002350988561514728583455765982071533026645717985517980855365926236850006129930346077117064851336181163787841796875", 0.00000000000000000000000000000000000002350988561514728583455765982071533026645717985517980855365926236850006129930346077117064851336181163787841796875f)]
     [InlineData("0.00000000000000000000000000000000000001175494210692441075487029444849287348827052428745893333857174530571588870475618904265502351336181163787841796875", 0.00000000000000000000000000000000000001175494210692441075487029444849287348827052428745893333857174530571588870475618904265502351336181163787841796875f)]
     [Theory]
-    private void TestGeneral_Float(string sut, float expectedValue)
+    private void TestGeneralFloat(string sut, float expectedValue)
     {
       Assert.Equal(expectedValue, FastFloatParser.ParseFloat(sut));
       Assert.Equal(expectedValue, FastFloatParser.ParseFloat(sut.AsSpan()));

@@ -24,7 +24,7 @@ namespace csFastFloat.Structures
       char* integerStart = p;
       if (last - p < 8)
       {
-        while (p != last && Utils.is_integer(*p, out uint digit))
+        while (p != last && Utils.IsInteger(*p, out uint digit))
         {
           mantissa = mantissa * 10 + digit;
           ++p;
@@ -66,7 +66,7 @@ namespace csFastFloat.Structures
         // This bound allows cancellation by any mantissa that fits in the
         // input span, while keeping arbitrarily large exponents bounded.
         long exponentLimit = last - first + 400;
-        while (p != last && Utils.is_integer(*p, out uint digit))
+        while (p != last && Utils.IsInteger(*p, out uint digit))
         {
           if (explicitExponent < exponentLimit) { explicitExponent = explicitExponent * 10 + digit; }
           ++p;
@@ -98,7 +98,7 @@ namespace csFastFloat.Structures
           p += 8;
           continue;
         }
-        if (!Utils.is_integer(*p, out uint digit)) { break; }
+        if (!Utils.IsInteger(*p, out uint digit)) { break; }
         if (significantDigits < 19) { mantissa = mantissa * 10 + digit; }
         else { discardedNonZero |= digit != 0; }
         if (mantissa != 0) { ++significantDigits; }
@@ -123,7 +123,7 @@ namespace csFastFloat.Structures
       byte* integerStart = p;
       if (last - p < 8)
       {
-        while (p != last && Utils.is_integer(*p, out uint digit))
+        while (p != last && Utils.IsInteger(*p, out uint digit))
         {
           mantissa = mantissa * 10 + digit;
           ++p;
@@ -165,7 +165,7 @@ namespace csFastFloat.Structures
         // This bound allows cancellation by any mantissa that fits in the
         // input span, while keeping arbitrarily large exponents bounded.
         long exponentLimit = last - first + 400;
-        while (p != last && Utils.is_integer(*p, out uint digit))
+        while (p != last && Utils.IsInteger(*p, out uint digit))
         {
           if (explicitExponent < exponentLimit) { explicitExponent = explicitExponent * 10 + digit; }
           ++p;
@@ -191,14 +191,14 @@ namespace csFastFloat.Structures
       while (p != last)
       {
         if (last - p >= 8 && (significantDigits <= 11 || significantDigits >= 19) &&
-            Utils.is_made_of_eight_digits_fast(p))
+            Utils.IsMadeOfEightDigitsFast(p))
         {
-          uint chunk = Utils.parse_eight_digits_unrolled(p);
+          uint chunk = Utils.ParseEightDigitsUnrolled(p);
           AppendChunk(chunk, ref mantissa, ref significantDigits, ref discardedNonZero);
           p += 8;
           continue;
         }
-        if (!Utils.is_integer(*p, out uint digit)) { break; }
+        if (!Utils.IsInteger(*p, out uint digit)) { break; }
         if (significantDigits < 19) { mantissa = mantissa * 10 + digit; }
         else { discardedNonZero |= digit != 0; }
         if (mantissa != 0) { ++significantDigits; }

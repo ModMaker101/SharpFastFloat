@@ -24,7 +24,7 @@ namespace csFastFloat.Constants
     internal const int LargestPowerOfFive = 308;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static byte get_powers(uint n)
+    internal static byte GetPowers(uint n)
     {
       Debug.Assert(n < powersTable.Length);
       ref byte tableRef = ref MemoryMarshal.GetReference(powersTable);
@@ -37,7 +37,7 @@ namespace csFastFloat.Constants
     };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static ulong get_power_of_five_128(int index)
+    internal static ulong GetPowerOfFive128(int index)
     {
 #if NET5_0_OR_GREATER
       Debug.Assert(index < s_powerOfFive128.Length);

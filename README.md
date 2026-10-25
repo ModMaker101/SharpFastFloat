@@ -168,7 +168,7 @@ A special thanks to [Egor Bogatov](https://github.com/EgorBo) and all contributo
 
 Variable names follow .NET conventions: camelCase locals and parameters,
 `_camelCase` private instance fields, `s_camelCase` private static fields, and
-PascalCase constants and exposed fields. These rules are configured in
+PascalCase constants, exposed fields, classes, methods, and local functions. These rules are configured in
 `.editorconfig`. Named argument callers should use `decimalSeparator`,
 `thousandsSeparator`, and `charactersConsumed`; the previous parameter names
 contained underscores. Positional calls and binary method signatures are unchanged.

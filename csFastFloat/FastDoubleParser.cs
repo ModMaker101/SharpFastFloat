@@ -22,7 +22,7 @@ namespace csFastFloat
     private static void ThrowArgumentException() => throw new ArgumentException();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static double Exact_power_of_ten(long power)
+    internal static double ExactPowerOfTen(long power)
     {
 #if NET5_0_OR_GREATER
       Debug.Assert(power < CalculationConstants.PowersOfTenDouble.Length);
@@ -58,11 +58,11 @@ namespace csFastFloat
       double value = pns.Mantissa;
       if (pns.Exponent < 0)
       {
-        value /= Exact_power_of_ten(-pns.Exponent);
+        value /= ExactPowerOfTen(-pns.Exponent);
       }
       else
       {
-        value *= Exact_power_of_ten(pns.Exponent);
+        value *= ExactPowerOfTen(pns.Exponent);
       }
       if (pns.Negative) { value = -value; }
       return value;
@@ -458,7 +458,7 @@ namespace csFastFloat
       charactersConsumed = 0;
       value = 0;
 
-      while ((first != last) && Utils.is_ascii_space(*first))
+      while ((first != last) && Utils.IsAsciiSpace(*first))
       {
         first++;
         leadingSpaces++;
@@ -519,7 +519,7 @@ namespace csFastFloat
       charactersConsumed = 0;
       int leadingSpaces = 0;
 
-      while ((first != last) && Utils.is_space(*first))
+      while ((first != last) && Utils.IsSpace(*first))
       {
         first++;
         leadingSpaces++;
@@ -597,7 +597,7 @@ namespace csFastFloat
       // 2. We need an extra bit for rounding purposes
       // 3. We might lose a bit due to the "upperbit" routine (result too small, requiring a shift)
 
-      value128 product = Utils.compute_product_approximation(DoubleBinaryConstants.MantissaExplicitBits + 3, q, w);
+      value128 product = Utils.ComputeProductApproximation(DoubleBinaryConstants.MantissaExplicitBits + 3, q, w);
       if (product.Low == 0xFFFFFFFFFFFFFFFF)
       { //  could guard it further
         // In some very rare cases, this could happen, in which case we might need a more accurate
@@ -619,7 +619,7 @@ namespace csFastFloat
 
       answer.Mantissa = product.High >> (upperbit + 64 - DoubleBinaryConstants.MantissaExplicitBits - 3);
 
-      answer.Power2 = Utils.power((int)q) + upperbit - lz - DoubleBinaryConstants.MinimumExponent;
+      answer.Power2 = Utils.Power((int)q) + upperbit - lz - DoubleBinaryConstants.MinimumExponent;
       if (answer.Power2 <= 0)
       { // we have a subnormal?
         // Here have that answer.power2 <= 0 so -answer.power2 >= 0
@@ -718,9 +718,9 @@ namespace csFastFloat
       while (d.DecimalPoint > 0)
       {
         uint n = (uint)(d.DecimalPoint);
-        int shift = (n < NumPowers) ? CalculationConstants.get_powers(n) : MaxShift;
+        int shift = (n < NumPowers) ? CalculationConstants.GetPowers(n) : MaxShift;
 
-        d.decimal_right_shift(shift);
+        d.DecimalRightShift(shift);
         if (d.DecimalPoint < -CalculationConstants.DecimalPointRange)
         {
           // should be zero
@@ -747,10 +747,10 @@ namespace csFastFloat
         else
         {
           uint n = (uint)(-d.DecimalPoint);
-          shift = (n < NumPowers) ? CalculationConstants.get_powers(n) : MaxShift;
+          shift = (n < NumPowers) ? CalculationConstants.GetPowers(n) : MaxShift;
         }
 
-        d.decimal_left_shift(shift);
+        d.DecimalLeftShift(shift);
 
         if (d.DecimalPoint > CalculationConstants.DecimalPointRange)
         {
@@ -773,7 +773,7 @@ namespace csFastFloat
         {
           n = MaxShift;
         }
-        d.decimal_right_shift(n);
+        d.DecimalRightShift(n);
         exp2 += (int)(n);
       }
       if ((exp2 - minExp) >= DoubleBinaryConstants.InfinitePower)
@@ -784,16 +784,16 @@ namespace csFastFloat
       }
 
       int mantissaSizeInBits = DoubleBinaryConstants.MantissaExplicitBits + 1;
-      d.decimal_left_shift(mantissaSizeInBits);
+      d.DecimalLeftShift(mantissaSizeInBits);
 
-      ulong mantissa = d.round();
+      ulong mantissa = d.Round();
       // It is possible that we have an overflow, in which case we need
       // to shift back.
       if (mantissa >= ((ulong)(1) << mantissaSizeInBits))
       {
-        d.decimal_right_shift(1);
+        d.DecimalRightShift(1);
         exp2 += 1;
-        mantissa = d.round();
+        mantissa = d.Round();
         if ((exp2 - minExp) >= DoubleBinaryConstants.InfinitePower)
         {
           answer.Power2 = DoubleBinaryConstants.InfinitePower;
@@ -811,14 +811,14 @@ namespace csFastFloat
     // UTF-16 inputs
     internal static AdjustedMantissa ParseLongMantissa(char* first, char* last, char decimalSeparator)
     {
-      DecimalInfo d = DecimalInfo.parse_decimal(first, last, decimalSeparator);
+      DecimalInfo d = DecimalInfo.ParseDecimal(first, last, decimalSeparator);
       return ComputeFloat(d);
     }
 
     // UTF-8/ASCII inputs
     internal static AdjustedMantissa ParseLongMantissa(byte* first, byte* last, byte decimalSeparator)
     {
-      DecimalInfo d = DecimalInfo.parse_decimal(first, last, decimalSeparator);
+      DecimalInfo d = DecimalInfo.ParseDecimal(first, last, decimalSeparator);
       return ComputeFloat(d);
     }
 
@@ -830,15 +830,15 @@ namespace csFastFloat
 
       if (last - first >= 3)
       {
-        if (Utils.strncasecmp(first, "nan", 3))
+        if (Utils.Strncasecmp(first, "nan", 3))
         {
           charactersConsumed = 3;
           result = DoubleBinaryConstants.NaN;
           return true;
         }
-        if (Utils.strncasecmp(first, "inf", 3))
+        if (Utils.Strncasecmp(first, "inf", 3))
         {
-          if ((last - first >= 8) && Utils.strncasecmp(first, "infinity", 8))
+          if ((last - first >= 8) && Utils.Strncasecmp(first, "infinity", 8))
           {
             charactersConsumed = 8;
             result = DoubleBinaryConstants.PositiveInfinity;
@@ -850,16 +850,16 @@ namespace csFastFloat
         }
         if (last - first >= 4)
         {
-          if (Utils.strncasecmp(first, "+nan", 4) || Utils.strncasecmp(first, "-nan", 4))
+          if (Utils.Strncasecmp(first, "+nan", 4) || Utils.Strncasecmp(first, "-nan", 4))
           {
             charactersConsumed = 4;
             result = DoubleBinaryConstants.NaN;
             return true;
           }
-          if (Utils.strncasecmp(first, "+inf", 4) ||
-              Utils.strncasecmp(first, "-inf", 4))
+          if (Utils.Strncasecmp(first, "+inf", 4) ||
+              Utils.Strncasecmp(first, "-inf", 4))
           {
-            if ((last - first >= 9) && Utils.strncasecmp(first + 1, "infinity", 8))
+            if ((last - first >= 9) && Utils.Strncasecmp(first + 1, "infinity", 8))
             {
               charactersConsumed = 9;
             }
@@ -874,13 +874,13 @@ namespace csFastFloat
       }
       else if (last - first >= 1)
       {
-        if (Utils.strncasecmp(first, "∞", 1))
+        if (Utils.Strncasecmp(first, "∞", 1))
         {
           charactersConsumed = 1;
           result = DoubleBinaryConstants.PositiveInfinity;
           return true;
         }
-        if ((last - first >= 2) && Utils.strncasecmp(first, "-∞", 2))
+        if ((last - first >= 2) && Utils.Strncasecmp(first, "-∞", 2))
         {
           charactersConsumed = 2;
           result = DoubleBinaryConstants.NegativeInfinity;
@@ -912,14 +912,14 @@ namespace csFastFloat
 
       if (last - first >= 3)
       {
-        if (Utils.strncasecmp(first, nanString, 3))
+        if (Utils.Strncasecmp(first, nanString, 3))
         {
           charactersConsumed = 3;
           result = DoubleBinaryConstants.NaN; return true;
         }
-        if (Utils.strncasecmp(first, infString, 3))
+        if (Utils.Strncasecmp(first, infString, 3))
         {
-          if ((last - first >= 8) && Utils.strncasecmp(first, infinityString, 8))
+          if ((last - first >= 8) && Utils.Strncasecmp(first, infinityString, 8))
           {
             charactersConsumed = 8;
             result = DoubleBinaryConstants.PositiveInfinity; return true;
@@ -929,15 +929,15 @@ namespace csFastFloat
         }
         if (last - first >= 4)
         {
-          if (Utils.strncasecmp(first, pnanString, 4) || Utils.strncasecmp(first, mnanString, 4))
+          if (Utils.Strncasecmp(first, pnanString, 4) || Utils.Strncasecmp(first, mnanString, 4))
           {
             charactersConsumed = 4;
             result = DoubleBinaryConstants.NaN; return true;
           }
-          if (Utils.strncasecmp(first, pinfString, 4) ||
-              Utils.strncasecmp(first, minfString, 4))
+          if (Utils.Strncasecmp(first, pinfString, 4) ||
+              Utils.Strncasecmp(first, minfString, 4))
           {
-            if ((last - first >= 9) && Utils.strncasecmp(first + 1, infinityString, 8))
+            if ((last - first >= 9) && Utils.Strncasecmp(first + 1, infinityString, 8))
             {
               charactersConsumed = 9;
             }

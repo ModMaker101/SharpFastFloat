@@ -46,7 +46,7 @@ namespace csFastFloat.Benchmark
       ulong value = 0;
       foreach (char c in Input)
       {
-        if (!Utils.is_integer(c, out uint digit)) { break; }
+        if (!Utils.IsInteger(c, out uint digit)) { break; }
         value = value * 10 + digit;
       }
       return value;
@@ -65,7 +65,7 @@ namespace csFastFloat.Benchmark
           value = value * 10000 + chunk;
           p += 4;
         }
-        while (p != last && Utils.is_integer(*p, out uint digit))
+        while (p != last && Utils.IsInteger(*p, out uint digit))
         {
           value = value * 10 + digit;
           ++p;
@@ -87,7 +87,7 @@ namespace csFastFloat.Benchmark
           value = value * 100000000 + chunk;
           p += 8;
         }
-        while (p != last && Utils.is_integer(*p, out uint digit))
+        while (p != last && Utils.IsInteger(*p, out uint digit))
         {
           value = value * 10 + digit;
           ++p;

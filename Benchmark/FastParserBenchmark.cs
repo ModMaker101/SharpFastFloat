@@ -47,7 +47,7 @@ namespace csFastFloat.Benchmark
     }
 
     [Benchmark(Description = "FastFloat.TryParseDouble() - UTF8")]
-    public double FastParserUtf8_()
+    public double FastParserUtf8()
     {
       double max = double.MinValue;
 
@@ -60,7 +60,7 @@ namespace csFastFloat.Benchmark
     }
 
     [Benchmark(Description = "FastFloat.TryParseDouble()")]
-    public double FastParser_()
+    public double FastParser()
     {
       double max = double.MinValue;
 
@@ -77,7 +77,7 @@ namespace csFastFloat.Benchmark
 
 
     [Benchmark(Description = "ParseNumberString() only")]
-    public double FastParser_PNS()
+    public double FastParserPNS()
     {
       double max = double.MinValue;
 
@@ -102,7 +102,7 @@ namespace csFastFloat.Benchmark
 
 
     [Benchmark(Baseline = true, Description = "Double.Parse()")]
-    public double Double_std()
+    public double DoubleStd()
     {
       double max = double.MinValue;
       foreach (string l in _lines)

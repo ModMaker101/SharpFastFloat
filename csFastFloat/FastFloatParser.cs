@@ -473,12 +473,13 @@ namespace csFastFloat
       }
       charactersConsumed = pns.CharactersConsumed + leadingSpaces;
 
-      result = ConvertNumber(first, last, pns, decimalSeparator);
+      result = ConvertNumber(first, last, pns, decimalSeparator,
+        styles.IsSet(NumberStyles.AllowThousands) && thousandsSeparator != decimalSeparator ? thousandsSeparator : -1);
       return true;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static float ConvertNumber(char* first, char* last, ParsedNumberString pns, char decimalSeparator)
+    private static float ConvertNumber(char* first, char* last, ParsedNumberString pns, char decimalSeparator, int groupingSeparator = -1)
     {
       // Next is Clinger's fast path.
       if (FloatBinaryConstants.MinExponentFastPath <= pns.Exponent && pns.Exponent <= FloatBinaryConstants.MaxExponentFastPath && pns.Mantissa <= FloatBinaryConstants.MaxMantissaFastPath && !pns.TooManyDigits)
@@ -487,11 +488,14 @@ namespace csFastFloat
       }
 
       AdjustedMantissa am = ComputeFloat(pns.Exponent, pns.Mantissa);
-      if (pns.TooManyDigits)
+      if (pns.TooManyDigits && am.Power2 >= 0)
       {
-        if (am != ComputeFloat(pns.Exponent, pns.Mantissa + 1))
+        AdjustedMantissa upper = ComputeFloat(pns.Exponent, pns.Mantissa + 1);
+        if (am != upper)
         {
-          am.Power2 = -1; // value is invalid.
+          am = ExactDigitComparison.Round(first, last, pns, am, upper,
+            FloatBinaryConstants.MantissaExplicitBits, FloatBinaryConstants.MinimumExponent,
+            decimalSeparator, groupingSeparator);
         }
       }
       // If we called compute_float<binary_format<T>>(pns.exponent, pns.mantissa) and we have an invalid power (am.power2 < 0),
@@ -532,12 +536,13 @@ namespace csFastFloat
       }
       charactersConsumed = pns.CharactersConsumed + leadingSpaces;
 
-      result = ConvertNumber(first, last, pns, decimalSeparator);
+      result = ConvertNumber(first, last, pns, decimalSeparator,
+        styles.IsSet(NumberStyles.AllowThousands) && thousandsSeparator != decimalSeparator ? thousandsSeparator : -1);
       return true;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static float ConvertNumber(byte* first, byte* last, ParsedNumberString pns, byte decimalSeparator)
+    private static float ConvertNumber(byte* first, byte* last, ParsedNumberString pns, byte decimalSeparator, int groupingSeparator = -1)
     {
       // Next is Clinger's fast path.
       if (FloatBinaryConstants.MinExponentFastPath <= pns.Exponent && pns.Exponent <= FloatBinaryConstants.MaxExponentFastPath && pns.Mantissa <= FloatBinaryConstants.MaxMantissaFastPath && !pns.TooManyDigits)
@@ -546,11 +551,14 @@ namespace csFastFloat
       }
 
       AdjustedMantissa am = ComputeFloat(pns.Exponent, pns.Mantissa);
-      if (pns.TooManyDigits)
+      if (pns.TooManyDigits && am.Power2 >= 0)
       {
-        if (am != ComputeFloat(pns.Exponent, pns.Mantissa + 1))
+        AdjustedMantissa upper = ComputeFloat(pns.Exponent, pns.Mantissa + 1);
+        if (am != upper)
         {
-          am.Power2 = -1; // value is invalid.
+          am = ExactDigitComparison.Round(first, last, pns, am, upper,
+            FloatBinaryConstants.MantissaExplicitBits, FloatBinaryConstants.MinimumExponent,
+            decimalSeparator, groupingSeparator);
         }
       }
       // If we called compute_float<binary_format<T>>(pns.exponent, pns.mantissa) and we have an invalid power (am.power2 < 0),

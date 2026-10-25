@@ -314,3 +314,54 @@ All measured strict methods allocated zero bytes. Float halfway and subnormal
 rounding, negative zero, malformed byte tails, zero-only discarded tails, and
 large exponent cancellation are covered by the scanner test matrix on x64 and
 ARM64, with hardware intrinsics enabled and disabled.
+
+## Exact midpoint rounding
+
+Ambiguous long mantissas now use a stack-backed integer comparison adapted from
+upstream fast_float's `digit_comparison.h` and `bigint.h`. When the retained
+19-digit coefficient and its successor round to adjacent values, the parser
+compares the original decimal digits with their exact binary midpoint and selects
+the correctly rounded endpoint, including ties to even. This avoids the older
+repeated decimal-shifting fallback for these cases.
+
+The implementation shares this path across float/double and UTF-16/UTF-8, supports
+regular-parser grouping and custom decimal separators, and preserves signed zero,
+subnormal and overflow rounding. It bounds significant digits at 114 for float and
+769 for double, retains a sticky nonzero suffix, and uses two 4096-bit stack buffers
+without heap allocations. Existing decimal-shifting conversion remains available
+when the conversion engine cannot establish adjacent endpoints. The common scanner
+and its discarded-zero optimization are retained.
+
+`ExactMidpointTests` constructs exact midpoints with independent `BigInteger`
+arithmetic, then checks ties and values immediately above and below them in all
+four strict and all four regular entry points. It includes negative inputs,
+subnormal/normal and finite/infinity transitions, and tails beyond the digit bounds.
+The stack integer operations are also checked independently against `BigInteger`.
+CI includes these tests on x64/ARM64 with intrinsics enabled and disabled.
+
+Run the midpoint benchmarks with:
+
+```sh
+dotnet run -c Release --project Benchmark -- --filter '*MidpointRoundingBenchmark*' --job short --warmupCount 3 --iterationCount 5 --iterationTime 100 --launchCount 1
+```
+
+Before/after BenchmarkDotNet means on AMD EPYC 9V74, Debian 13, .NET 9.0.21,
+using the same harness at commit `996080e` and with the midpoint comparison port
+(three warmups, five 100 ms measurement iterations, one launch):
+
+| API | Input | Before | After | Speedup |
+|---|---|---:|---:|---:|
+| DoubleUtf16 | `90071992547409930001e-4` | 468.50 ns | 69.92 ns | 6.70x |
+| DoubleUtf8 | `90071992547409930001e-4` | 469.84 ns | 69.53 ns | 6.76x |
+| DoubleUtf16 | `1.00000000000000011102230246251565404236316680908203125` | 422.64 ns | 116.76 ns | 3.62x |
+| DoubleUtf8 | `1.00000000000000011102230246251565404236316680908203125` | 428.20 ns | 112.76 ns | 3.80x |
+| FloatUtf16 | `1.000000059604644775390625000000000000000000000001` | 359.55 ns | 110.65 ns | 3.25x |
+| FloatUtf8 | `1.000000059604644775390625000000000000000000000001` | 367.69 ns | 119.64 ns | 3.07x |
+
+All 24 measured combinations allocated zero bytes. Common-input controls retained
+similar costs: UTF-16 double `12345678.12345678` measured 18.86 ns before and
+18.84 ns after, and the existing zero-tail shortcut `90071992547409930000e-4`
+measured 20.24 ns before and 20.48 ns after. Short `123` measurements moved by
+less than 0.6 ns in either direction across the four entry points. These are
+short shared-machine runs, not an application-wide throughput claim. ARM64
+correctness is configured in CI; these timings were collected on x64.

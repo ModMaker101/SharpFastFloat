@@ -5,6 +5,9 @@
 A performance-focused fork of [csFastFloat](https://github.com/CarlVerret/csFastFloat),
 derived from [fast_float](https://github.com/fastfloat/fast_float).
 
+Targets .NET 8, .NET 9, and .NET Standard 2.0. Dedicated .NET 5 and .NET Core 3.1
+builds are no longer included; the .NET Standard build retains portable fallbacks.
+
 SharpFastFloat provides correctly rounded float and double parsing for UTF-16 and
 UTF-8. It includes strict decimal entry points, configurable regular parsing,
 eight-digit scanning with x64/ARM SIMD, and stack-backed exact midpoint rounding.

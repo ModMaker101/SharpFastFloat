@@ -3,7 +3,7 @@ using System;
 using SharpFastFloat.Tests;
 using Xunit;
 
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using System.Runtime.Intrinsics.X86;
 #endif
 
@@ -15,7 +15,7 @@ namespace SharpFastFloat.Tests.Basic.SIMD
   {
 
 
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
 
 
 

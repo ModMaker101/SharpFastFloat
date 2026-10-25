@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 <PropertyGroup>
-    <TargetFrameworks>net9.0;net8.0;net5.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net9.0;net8.0;netstandard2.0</TargetFrameworks>
     <Authors>ModMaker101;Carl Verret</Authors>
     <PackageId>SharpFastFloat</PackageId>
     <AssemblyName>SharpFastFloat</AssemblyName>
@@ -20,7 +20,7 @@
     <LangVersion>9</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>0.1.0-preview.1</Version>
+    <Version>0.1.0-preview.2</Version>
 
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>

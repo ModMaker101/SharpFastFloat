@@ -39,7 +39,7 @@ namespace SharpFastFloat.Structures
   // so it can select between those endpoints without recomputing an approximation.
   internal static unsafe class ExactDigitComparison
   {
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
     // Each limb is written before it enters Length; unused stack storage is never read.
     [SkipLocalsInit]
 #endif
@@ -143,7 +143,7 @@ namespace SharpFastFloat.Structures
       return digits;
     }
 
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
     // Each limb is written before it enters Length; unused stack storage is never read.
     [SkipLocalsInit]
 #endif

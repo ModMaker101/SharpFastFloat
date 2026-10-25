@@ -22,7 +22,7 @@ namespace SharpFastFloat.Tests.suppl_tests
     const string Version = "9.0";
 #endif
 
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
 
     /// <summary>
     /// strtod test cases

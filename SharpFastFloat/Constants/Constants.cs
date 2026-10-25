@@ -39,7 +39,7 @@ namespace SharpFastFloat.Constants
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static ulong GetPowerOfFive128(int index)
     {
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
       Debug.Assert(index < s_powerOfFive128.Length);
       ref ulong tableRef = ref MemoryMarshal.GetArrayDataReference(s_powerOfFive128);
       return Unsafe.Add(ref tableRef, (nint)(uint)index);

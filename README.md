@@ -49,18 +49,24 @@ In this repo [FastFloatTestBench](https://github.com/CarlVerret/FastFloatTestBen
 
 # Requirements
 
-.NET Standard 2.0 or newer. Under .NET 5 framework or newer, the library takes advantage of the new Math.BigMul() and Sse4.1 (SIMD) functions.
+The package targets .NET 8, .NET 9, and .NET Standard 2.0. Dedicated .NET 5 and
+.NET Core 3.1 builds are no longer included. The .NET 8/9 builds use hardware
+intrinsics where available; the .NET Standard 2.0 build retains portable fallbacks
+and compatibility with runtimes implementing that standard.
 
 # Compile and testing
 
-As this library targets multiple framework, you can specify the target framework version with -f parameter :
+Use the .NET 9 SDK to build the solution, with the .NET 8 and .NET 9 runtimes
+installed to run both modern test targets:
 
-``` command line
-dotnet build -c Release -f net9.0
-dotnet test -f net9.0
-
+```sh
+dotnet build SharpFastFloat.sln -c Release
+dotnet test SharpFastFloat.Tests/SharpFastFloat.Tests.csproj -c Release -f net8.0
+dotnet test SharpFastFloat.Tests/SharpFastFloat.Tests.csproj -c Release -f net9.0
 ```
-If you omit the target framework and you don't have both .net 8.0 and dotnetcore 3.1 SDKs installed you may experience an error when building or running tests.
+
+The additional .NET Framework 4.7.2 test target exercises the .NET Standard 2.0
+build and requires Windows or Mono to execute. It is not a separate package target.
 
 The set of unit tests in /SharpFastFloat.Tests project combines unit tests from many libraries.  It includes tests used by the Go Team.
 Additional info on Nigel Tao's work can be found [here](https://nigeltao.github.io/blog/2020/eisel-lemire.html#testing).  It also include strtod test file that can be found [here](https://github.com/ahrvoje/numerics/blob/master/strtod/strtod_tests.toml).
@@ -387,8 +393,8 @@ an environment restriction.
 After merging the release changes, tag the intended commit and push the tag:
 
 ```sh
-git tag v0.1.0-preview.1
-git push origin v0.1.0-preview.1
+git tag v0.1.0-preview.2
+git push origin v0.1.0-preview.2
 ```
 
 Use a new version for each release; prerelease tags such as `v0.1.0-preview.2` are

@@ -10,6 +10,8 @@ namespace csFastFloat.Structures
     internal int CharactersConsumed;
     internal bool Negative;
     internal bool Valid;
+    // Whether conversion needs a mantissa interval for discarded digits.
+    // Regular scans are conservative; strict scans set this only for nonzero tails.
     internal bool TooManyDigits;
 
     // UTF-16 inputs involving SIMD within  eval_parse_eight_digits_simd when HAS_INTRINSICS

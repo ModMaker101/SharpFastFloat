@@ -64,15 +64,20 @@ Some unit tests are based on [Approvals.net library](https://github.com/approval
 
 # Usage
 
-`FastDoubleParser.TryParseDoubleStrict(ReadOnlySpan<char>, out double)` parses a
-complete decimal token using fixed `.` syntax and ASCII digits. It accepts an
-optional sign, decimal point, and exponent (for example, `-12.5e+3`, `.5`, or
-`1.`). It rejects whitespace, grouping, trailing characters, NaN, Infinity, and
+`FastDoubleParser.TryParseDoubleStrict` and `FastFloatParser.TryParseFloatStrict`
+each accept `ReadOnlySpan<char>` (UTF-16) or `ReadOnlySpan<byte>` (UTF-8/ASCII).
+They parse a complete decimal token using fixed `.` syntax and ASCII digits.
+They accept an optional sign, decimal point, and exponent (for example, `-12.5e+3`, `.5`, or
+`1.`). They reject whitespace, grouping, trailing characters, NaN, Infinity, and
 radix prefixes. Failure returns `false` and sets the result to zero. Overflow
 returns signed infinity; underflow and zero preserve the sign.
 
 ```csharp
 bool valid = FastDoubleParser.TryParseDoubleStrict("123.45e-2".AsSpan(), out double value);
+bool singleValid = FastFloatParser.TryParseFloatStrict("123.45e-2".AsSpan(), out float single);
+ReadOnlySpan<byte> utf8 = System.Text.Encoding.UTF8.GetBytes("123.45e-2");
+bool utf8Valid = FastDoubleParser.TryParseDoubleStrict(utf8, out double utf8Value);
+bool utf8SingleValid = FastFloatParser.TryParseFloatStrict(utf8, out float utf8Single);
 ```
 
 For JavaScript conversion, the caller (such as SharpES) remains responsible for
@@ -81,6 +86,14 @@ prefixes before calling this decimal entry point. No separate decimal validation
 pass is needed. The strict scanner validates while accumulating digits, uses
 SIMD for long runs on x64 and ARM NEON, and retains the original span for exact
 rounding when needed. Existing configurable parsing APIs keep their behavior.
+
+All four strict entry points use the same scanner design. Float conversion rounds
+directly to binary32. The scanner tracks whether discarded mantissa digits contain
+any nonzero values: an all-zero tail is an exact scaled coefficient and skips the
+uncertainty check against the next mantissa. Nonzero tails retain the exact
+rounding fallback. Single ASCII digits return immediately, and short integer runs
+avoid significant-digit bookkeeping. Exactly representable integers return
+directly through 2^53 for double and 2^24 for float, preserving negative zero.
 
 Two functions are available: `FastDoubleParser.ParseDouble` and `FastFloatParser.ParseFloat`. Since v3.0, TryParse pattern is supported for each function.
 
@@ -248,3 +261,56 @@ is disabled; grouping retains its existing scalar implementation.
 
 A repeat of the UTF-8 double benchmarks resolved a high-variance eight-digit
 measurement: `12345678` measured 16.03 ns, compared with 17.09 ns before.
+
+## Strict entry-point parity and discarded-zero optimization
+
+The strict float and double APIs share UTF-16 and UTF-8 scanner implementations,
+including chunk parsing, integer returns, and exact versus uncertain discarded
+tails. Original spans remain available for exact rounding. The UTF-8 decimal
+fallback also supports large explicit exponents that cancel very long mantissas,
+matching the UTF-16 fallback.
+
+Run the short-input/zero-tail before-and-after harness and the four-entry-point
+comparison (which also includes the configurable parsers) with:
+
+```sh
+dotnet run -c Release --project Benchmark -- --filter '*StrictDoubleScannerBenchmark*' '*StrictEntryPointsBenchmark*' --job short --warmupCount 3 --iterationCount 5 --iterationTime 200 --launchCount 1
+```
+
+Measured means on AMD EPYC 9V74, Debian 13, .NET 9.0.21, with scanner commit
+`6df711d` as the before baseline and identical harness settings:
+
+| UTF-16 strict double input | Before | After |
+| --- | ---: | ---: |
+| `-0` | 4.69 ns | 3.59 ns |
+| `1` | 4.73 ns | 2.55 ns |
+| `1.0000000000000000000000000000000000000000` | 31.25 ns | 27.87 ns |
+| `1.00000000000000011102230246251565404236316680908203125` | 421.17 ns | 430.80 ns |
+| `1.2345678901234567000000000000000000` | 25.25 ns | 21.00 ns |
+| `1.2345678901234567000000000000000001` | 24.98 ns | 25.30 ns |
+| `123` | 6.27 ns | 4.40 ns |
+| `12345678` | 5.13 ns | 6.44 ns |
+| `1234567890123456` | 6.84 ns | 7.58 ns |
+| `90071992547409930000e-4` | 454.02 ns | 20.05 ns |
+| `90071992547409930001e-4` | 464.86 ns | 473.67 ns |
+
+The zero-tail midpoint example avoids an unnecessary exact fallback; the
+neighboring nonzero-tail example still takes that fallback to preserve rounding.
+The added tracking costs roughly 0.7–1.3 ns on the sampled 8/16-digit integers,
+while the specialized paths improve one- and three-digit inputs. These are short
+shared-machine measurements.
+
+The same run measured strict entry points as follows:
+
+| Input | Double UTF-16 | Double UTF-8 | Float UTF-16 | Float UTF-8 |
+| --- | ---: | ---: | ---: | ---: |
+| `1` | 2.59 ns | 2.65 ns | 2.57 ns | 2.87 ns |
+| `123` | 4.41 ns | 4.80 ns | 4.41 ns | 4.11 ns |
+| `1234567890123456` | 7.80 ns | 9.01 ns | 12.99 ns | 14.11 ns |
+| `90071992547409930000e-4` | 19.99 ns | 20.73 ns | 20.34 ns | 20.44 ns |
+| `167772170000000000000000e-16` | 25.73 ns | 26.05 ns | 26.50 ns | 26.74 ns |
+
+All measured strict methods allocated zero bytes. Float halfway and subnormal
+rounding, negative zero, malformed byte tails, zero-only discarded tails, and
+large exponent cancellation are covered by the scanner test matrix on x64 and
+ARM64, with hardware intrinsics enabled and disabled.

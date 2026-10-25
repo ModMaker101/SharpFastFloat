@@ -478,6 +478,7 @@ namespace csFastFloat
       return true;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static double ConvertNumber(char* first, char* last, ParsedNumberString pns, char decimalSeparator)
     {
       // Next is Clinger's fast path.
@@ -534,11 +535,17 @@ namespace csFastFloat
       }
       charactersConsumed = pns.CharactersConsumed + leadingSpaces;
 
+      value = ConvertNumber(first, last, pns, decimalSeparator);
+      return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static double ConvertNumber(byte* first, byte* last, ParsedNumberString pns, byte decimalSeparator)
+    {
       // Next is Clinger's fast path.
       if (DoubleBinaryConstants.MinExponentFastPath <= pns.Exponent && pns.Exponent <= DoubleBinaryConstants.MaxExponentFastPath && pns.Mantissa <= DoubleBinaryConstants.MaxMantissaFastPath && !pns.TooManyDigits)
       {
-        value = FastPath(pns);
-        return true;
+        return FastPath(pns);
       }
 
       AdjustedMantissa am = ComputeFloat(pns.Exponent, pns.Mantissa);
@@ -552,8 +559,7 @@ namespace csFastFloat
       // If we called compute_float<binary_format<T>>(pns.exponent, pns.mantissa) and we have an invalid power (am.power2 < 0),
       // then we need to go the long way around again. This is very uncommon.
       if (am.Power2 < 0) { am = ParseLongMantissa(first, last, decimalSeparator); }
-      value = ToFloat(pns.Negative, am);
-      return true;
+      return ToFloat(pns.Negative, am);
     }
 
 

@@ -499,16 +499,17 @@ namespace csFastFloat.Structures
         {
           ++p;
         }
-        int expNumber = 0; // exponential part
+        long expNumber = 0; // exponential part
         while ((p != pend) && Utils.is_integer(*p, out uint digit))
         {
-          if (expNumber < 0x10000)
+          if (expNumber < (long)int.MaxValue + 400)
           {
             expNumber = 10 * expNumber + (int)digit;
           }
           ++p;
         }
-        answer.DecimalPoint += (negExp ? -expNumber : expNumber);
+        long decimalPoint = answer.DecimalPoint + (negExp ? -expNumber : expNumber);
+        answer.DecimalPoint = (int)Math.Max(int.MinValue, Math.Min(int.MaxValue, decimalPoint));
       }
       // In very rare cases, we may have fewer than 19 digits, we want to be able to reliably
       // assume that all digits up to MaxDigitWithoutOverflow have been initialized.

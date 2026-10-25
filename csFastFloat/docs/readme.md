@@ -108,3 +108,19 @@ A special thanks to [Egor Bogatov](https://github.com/EgorBo) and all contributo
 # Reference
 
 - Daniel Lemire, [Number Parsing at a Gigabyte per Second](https://arxiv.org/abs/2101.11408), [Software: Practice and Experience](https://onlinelibrary.wiley.com/doi/10.1002/spe.2984) 51 (8), 2021.
+
+
+## Strict decimal parsing
+
+`FastDoubleParser.TryParseDoubleStrict` and `FastFloatParser.TryParseFloatStrict`
+accept either `ReadOnlySpan<char>` or `ReadOnlySpan<byte>`. They require a complete
+ASCII decimal token with an optional sign, decimal point (`.`), and exponent.
+Whitespace, grouping, trailing content, NaN, Infinity, and radix prefixes are
+rejected; callers should handle their language-specific rules before parsing.
+Failure returns false and zero. Overflow produces signed infinity, and zero or
+underflow preserves its sign. Float values round directly to binary32.
+
+The strict scanners use chunk parsing, short-integer paths, and an exact-integer
+return. Discarded zero-only tails preserve an exact coefficient, avoiding an
+unnecessary mantissa interval check. Other rounding cases retain the original
+input span for the exact fallback.

@@ -332,7 +332,7 @@ namespace csFastFloat
     /// <returns>parsed float value </returns>
     public static float ParseFloat(ReadOnlySpan<char> s, out int characters_consumed, NumberStyles styles = NumberStyles.Float, char decimal_separator = '.', char thousands_separator = ',')
     {
-      if (s == null)
+      if (s.IsEmpty)
       {
         ThrowArgumentNull();
       }

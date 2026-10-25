@@ -335,7 +335,7 @@ namespace csFastFloat
     /// <returns>parsed double value </returns>
     public static double ParseDouble(ReadOnlySpan<char> s, out int characters_consumed, NumberStyles styles = NumberStyles.Float, char decimal_separator = '.', char thousands_separator = ',')
     {
-      if (s == null)
+      if (s.IsEmpty)
       {
         ThrowArgumentNull();
       }

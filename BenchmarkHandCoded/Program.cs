@@ -1,6 +1,6 @@
+using csFastFloat;
 using System;
 using System.Diagnostics;
-using csFastFloat;
 using System.Globalization;
 
 namespace BenchmarkHandCoded

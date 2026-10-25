@@ -1,7 +1,6 @@
 using BenchmarkDotNet.Columns;
-using BenchmarkDotNet.Running;
-
 using BenchmarkDotNet.Reports;
+using BenchmarkDotNet.Running;
 using System.IO;
 using System.Linq;
 

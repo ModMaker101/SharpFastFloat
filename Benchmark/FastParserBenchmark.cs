@@ -1,18 +1,14 @@
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
-
 //using BenchmarkDotNet.Diagnostics.Windows;
 using BenchmarkDotNet.Jobs;
+using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
 using csFastFloat.Structures;
 using System;
-using System.Globalization;
-
-
-
-using BenchmarkDotNet.Reports;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace csFastFloat.Benchmark
 {

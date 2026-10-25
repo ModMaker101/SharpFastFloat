@@ -33,7 +33,7 @@ jobs:
       run: dotnet restore
 
     - name: Check formatting
-      run: dotnet format whitespace csFastFloat.sln --no-restore --verify-no-changes
+      run: dotnet format csFastFloat.sln --no-restore --verify-no-changes
 
     - name: Build
       run: dotnet build --no-restore  --configuration Release -p:ContinuousIntegrationBuild=true

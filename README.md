@@ -156,8 +156,8 @@ A special thanks to [Egor Bogatov](https://github.com/EgorBo) and all contributo
 Formatting uses the repository `.editorconfig` and the .NET SDK formatter:
 
 ```sh
-dotnet format whitespace csFastFloat.sln
-dotnet format whitespace csFastFloat.sln --verify-no-changes
+dotnet format csFastFloat.sln
+dotnet format csFastFloat.sln --verify-no-changes
 ```
 
 CI checks formatting and runs strict-parser tests on x64 and ARM64 with hardware

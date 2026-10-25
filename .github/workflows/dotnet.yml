@@ -32,6 +32,9 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
 
+    - name: Check formatting
+      run: dotnet format whitespace csFastFloat.sln --no-restore --verify-no-changes
+
     - name: Build
       run: dotnet build --no-restore  --configuration Release -p:ContinuousIntegrationBuild=true
 
@@ -44,3 +47,19 @@ jobs:
       with:
         name: packages
         path: '**/*.*nupkg'
+
+  strict-parser:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm]
+        intrinsics: ["1", "0"]
+    runs-on: ${{ matrix.os }}
+    env:
+      DOTNET_EnableHWIntrinsic: ${{ matrix.intrinsics }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+    - name: Test strict parser with SIMD and scalar paths
+      run: dotnet test TestcsFastFloat/TestcsFastFloat.csproj -f net9.0 -c Release --filter FullyQualifiedName~StrictDoubleParserTests

@@ -1,4 +1,4 @@
-﻿using csFastFloat;
+using csFastFloat;
 using System;
 using System.IO;
 using Xunit;

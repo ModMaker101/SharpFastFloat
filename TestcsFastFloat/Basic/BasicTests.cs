@@ -1,4 +1,4 @@
-﻿using csFastFloat;
+using csFastFloat;
 using csFastFloat.Structures;
 using System;
 using System.Globalization;

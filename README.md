@@ -64,6 +64,24 @@ Some unit tests are based on [Approvals.net library](https://github.com/approval
 
 # Usage
 
+`FastDoubleParser.TryParseDoubleStrict(ReadOnlySpan<char>, out double)` parses a
+complete decimal token using fixed `.` syntax and ASCII digits. It accepts an
+optional sign, decimal point, and exponent (for example, `-12.5e+3`, `.5`, or
+`1.`). It rejects whitespace, grouping, trailing characters, NaN, Infinity, and
+radix prefixes. Failure returns `false` and sets the result to zero. Overflow
+returns signed infinity; underflow and zero preserve the sign.
+
+```csharp
+bool valid = FastDoubleParser.TryParseDoubleStrict("123.45e-2".AsSpan(), out double value);
+```
+
+For JavaScript conversion, the caller (such as SharpES) remains responsible for
+trimming JavaScript whitespace, empty-string conversion, Infinity, and radix
+prefixes before calling this decimal entry point. No separate decimal validation
+pass is needed. The strict scanner validates while accumulating digits, uses
+SIMD for long runs on x64 and ARM NEON, and retains the original span for exact
+rounding when needed. Existing configurable parsing APIs keep their behavior.
+
 Two functions are available: `FastDoubleParser.ParseDouble` and `FastFloatParser.ParseFloat`. Since v3.0, TryParse pattern is supported for each function.
 
 `String`, `char *`  and `ReadOnlySpan<char>` are supported inputs.
@@ -132,3 +150,53 @@ A special thanks to [Egor Bogatov](https://github.com/EgorBo) and all contributo
 # Reference
 
 - Daniel Lemire, [Number Parsing at a Gigabyte per Second](https://arxiv.org/abs/2101.11408), [Software: Practice and Experience](https://onlinelibrary.wiley.com/doi/10.1002/spe.2984) 51 (8), 2021.
+
+## Formatting and strict-parser benchmarks
+
+Formatting uses the repository `.editorconfig` and the .NET SDK formatter:
+
+```sh
+dotnet format whitespace csFastFloat.sln
+dotnet format whitespace csFastFloat.sln --verify-no-changes
+```
+
+CI checks formatting and runs strict-parser tests on x64 and ARM64 with hardware
+intrinsics both enabled and disabled. Run the end-to-end and digit-run benchmarks
+(including scalar, four-digit, and eight-digit accumulation) with:
+
+```sh
+dotnet run -c Release --project Benchmark -- --filter '*StrictParserBenchmark*' '*DigitChunkBenchmark*' --job short
+```
+
+A short BenchmarkDotNet run on an AMD EPYC 9V74, Debian 13, .NET 9.0.21
+(three warmups and three 100 ms measurement iterations) produced these means:
+
+| Decimal input | Strict API | Configurable API | Runtime TryParse |
+| --- | ---: | ---: | ---: |
+| `1` | 4.59 ns | 15.40 ns | 27.46 ns |
+| `123` | 5.99 ns | 20.18 ns | 32.97 ns |
+| `12345678` | 4.96 ns | 17.21 ns | 39.65 ns |
+| `1234567890123456` | 6.75 ns | 20.29 ns | 53.52 ns |
+| `12345678.12345678` | 9.19 ns | 22.43 ns | 56.91 ns |
+| `9007199254740993` | 15.15 ns | 30.32 ns | 67.18 ns |
+
+All three APIs allocated zero bytes in these cases. The configurable and runtime
+APIs accept broader syntax, so these comparisons measure decimal-token throughput
+rather than equivalent validation contracts.
+
+The isolated digit-run comparison measured:
+
+| Digit run | Scalar | Four-digit chunks | Eight-digit chunks |
+| --- | ---: | ---: | ---: |
+| `1` | 0.27 ns | 1.03 ns | 1.00 ns |
+| `123` | 0.89 ns | 1.88 ns | 1.87 ns |
+| `1234` | 1.37 ns | 2.68 ns | 2.52 ns |
+| `12345678` | 3.13 ns | 4.60 ns | 1.86 ns |
+| `1234567890123456` | 7.64 ns | 8.68 ns | 3.03 ns |
+| `1234567890123456789` | 8.59 ns | 11.40 ns | 4.34 ns |
+
+These measurements favor eight-digit SIMD chunks for longer runs and scalar
+handling for short inputs. Four-digit parsing remains available to the benchmarks
+and the portable eight-digit fallback, without adding a four-digit fast path to
+the strict scanner. Results are from a shared x64 environment; ARM performance
+still needs measurement on ARM hardware.

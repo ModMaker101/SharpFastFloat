@@ -1,4 +1,4 @@
-﻿using ApprovalTests.Namers;
+using ApprovalTests.Namers;
 using csFastFloat;
 using System;
 using System.IO;

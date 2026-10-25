@@ -1,4 +1,4 @@
-﻿using ApprovalTests;
+using ApprovalTests;
 using ApprovalTests.Namers;
 using ApprovalTests.Reporters;
 using System;

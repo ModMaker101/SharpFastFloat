@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using csFastFloat;
 using System.Globalization;
@@ -49,11 +49,11 @@ namespace BenchmarkHandCoded
 
       average /= repeat;
       average_tpr /= repeat;
-      return new Tuple<double, double, double>(min_value, average,average_tpr);
+      return new Tuple<double, double, double>(min_value, average, average_tpr);
     }
     static internal Tuple<double, double, double> time_it_ns_ut8<T>(byte[][] lines, ParsingFuncUTF8 sut, long repeat)
     {
-      double average_tpr= 0;
+      double average_tpr = 0;
       double average = 0;
       double min_value = double.MaxValue;
 
@@ -89,7 +89,7 @@ namespace BenchmarkHandCoded
       }
       average_tpr /= repeat;
       average /= repeat;
-      return new Tuple<double, double, double>(min_value, average,average_tpr);
+      return new Tuple<double, double, double>(min_value, average, average_tpr);
     }
 
     internal static string[] GetLinesFromFile(string fileName) =>
@@ -202,11 +202,11 @@ namespace BenchmarkHandCoded
 
       print_separator();
       double volumeMB = volume / (1024.0 * 1024.0);
-    
-      Console.WriteLine("canada.txt - Volume : {0:N2} MB",volumeMB);
+
+      Console.WriteLine("canada.txt - Volume : {0:N2} MB", volumeMB);
       process_test(lines, _linesUtf8, (double)volume);
 
-    
+
       lines = GetLinesFromFile(@"data/mesh.txt");
       _linesUtf8 = Array.ConvertAll(lines, System.Text.Encoding.UTF8.GetBytes);
       volume = 0;
@@ -215,13 +215,13 @@ namespace BenchmarkHandCoded
         volume += l.Length;
       }
       volumeMB = volume / (1024.0 * 1024.0);
-      
+
       print_separator();
-      Console.WriteLine("mesh.txt - Volume : {0:N2} MB",volumeMB);
+      Console.WriteLine("mesh.txt - Volume : {0:N2} MB", volumeMB);
 
       process_test(lines, _linesUtf8, (double)volume);
 
-     
+
       lines = GetLinesFromFile(@"data/synthetic.txt");
       _linesUtf8 = Array.ConvertAll(lines, System.Text.Encoding.UTF8.GetBytes);
 
@@ -231,9 +231,9 @@ namespace BenchmarkHandCoded
         volume += l.Length;
       }
       volumeMB = volume / (1024.0 * 1024.0);
-    
+
       print_separator();
-     Console.WriteLine("synthetic.txt - Volume : {0:N2} MB",volumeMB);
+      Console.WriteLine("synthetic.txt - Volume : {0:N2} MB", volumeMB);
 
       process_test(lines, _linesUtf8, (double)volume);
 
@@ -244,7 +244,7 @@ namespace BenchmarkHandCoded
     private static void print_header()
     {
       print_separator();
-      Console.WriteLine("| Test name".PadRight(42) + "|                 MB/s |"+ " Mfloat/s | min ns/f | avg tick/f |");
+      Console.WriteLine("| Test name".PadRight(42) + "|                 MB/s |" + " Mfloat/s | min ns/f | avg tick/f |");
       print_separator();
     }
     private static void print_separator()

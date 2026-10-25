@@ -1,4 +1,4 @@
-﻿using csFastFloat.Constants;
+using csFastFloat.Constants;
 using csFastFloat.Structures;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -8,6 +8,9 @@ using System.Runtime.InteropServices;
 
 #if HAS_INTRINSICS
 using System.Runtime.Intrinsics;
+#if NET5_0_OR_GREATER
+using System.Runtime.Intrinsics.Arm;
+#endif
 using System.Runtime.Intrinsics.X86;
 #endif
 
@@ -67,6 +70,54 @@ namespace csFastFloat
       bool res = cc <= '9' - '0';
       cMinus0 = cc;
       return res;
+    }
+
+    // Callers must ensure that at least four/eight characters remain.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool TryParseFourConsecutiveDigits(char* start, out uint value)
+    {
+      if (BitConverter.IsLittleEndian)
+      {
+        ulong digits = Unsafe.ReadUnaligned<ulong>(start) - 0x0030003000300030;
+        if (((digits | (digits + 0x0076007600760076)) & 0xFF80FF80FF80FF80) == 0)
+        {
+          value = (uint)((digits & 0xFFFF) * 1000 + ((digits >> 16) & 0xFFFF) * 100 +
+                         ((digits >> 32) & 0xFFFF) * 10 + (digits >> 48));
+          return true;
+        }
+        value = 0;
+        return false;
+      }
+      value = 0;
+      for (int i = 0; i < 4; ++i)
+      {
+        if (!is_integer(start[i], out uint digit)) { value = 0; return false; }
+        value = value * 10 + digit;
+      }
+      return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool TryParseEightConsecutiveDigits(char* start, out uint value)
+    {
+#if HAS_INTRINSICS
+      if (Sse41.IsSupported
+#if NET5_0_OR_GREATER
+          || AdvSimd.IsSupported
+#endif
+         )
+      {
+        return TryParseEightConsecutiveDigits_SIMD(start, out value);
+      }
+#endif
+      if (TryParseFourConsecutiveDigits(start, out uint high) &&
+          TryParseFourConsecutiveDigits(start + 4, out uint low))
+      {
+        value = high * 10000 + low;
+        return true;
+      }
+      value = 0;
+      return false;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -267,6 +318,24 @@ namespace csFastFloat
     internal static bool TryParseEightConsecutiveDigits_SIMD(char* start, out uint value)
     {
 
+#if NET5_0_OR_GREATER
+      if (AdvSimd.IsSupported)
+      {
+        Vector128<ushort> digits = AdvSimd.Subtract(AdvSimd.LoadVector128((ushort*)start), Vector128.Create((ushort)'0'));
+        Vector128<ushort> invalid = AdvSimd.CompareGreaterThan(digits, Vector128.Create((ushort)9));
+        if ((invalid.AsUInt64().GetElement(0) | invalid.AsUInt64().GetElement(1)) != 0)
+        {
+          value = 0;
+          return false;
+        }
+        // Narrow only after validating all UTF-16 lanes, so non-ASCII chars
+        // cannot be mistaken for digits with matching low bytes.
+        ulong packed = AdvSimd.ExtractNarrowingLower(digits).AsUInt64().GetElement(0);
+        value = parse_eight_digits_unrolled(packed + 0x3030303030303030);
+        return true;
+      }
+
+#endif
       // escape if SIMD functions aren't available.
       if (!Sse41.IsSupported)
       {

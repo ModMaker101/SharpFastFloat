@@ -1,4 +1,4 @@
-﻿using csFastFloat.Constants;
+using csFastFloat.Constants;
 using System.Diagnostics;
 
 namespace csFastFloat.Structures

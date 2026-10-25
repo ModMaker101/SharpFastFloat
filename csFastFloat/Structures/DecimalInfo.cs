@@ -1,4 +1,4 @@
-﻿using csFastFloat.Constants;
+using csFastFloat.Constants;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -370,7 +370,8 @@ namespace csFastFloat.Structures
         int trailing_zeros = 0;
         while ((*preverse == '0') || (*preverse == decimal_separator))
         {
-          if (*preverse == '0') { trailing_zeros++; };
+          if (*preverse == '0') { trailing_zeros++; }
+          ;
           --preverse;
         }
         answer.decimal_point += (int)(answer.num_digits);
@@ -394,17 +395,18 @@ namespace csFastFloat.Structures
         {
           ++p;
         }
-        int exp_number = 0; // exponential part
+        long exp_number = 0; // exponential part
         while ((p != pend) && Utils.is_integer(*p, out uint cMinus0))
         {
           byte digit = (byte)cMinus0;
-          if (exp_number < 0x10000)
+          if (exp_number < (long)int.MaxValue + 400)
           {
             exp_number = 10 * exp_number + digit;
           }
           ++p;
         }
-        answer.decimal_point += (neg_exp ? -exp_number : exp_number);
+        long decimalPoint = answer.decimal_point + (neg_exp ? -exp_number : exp_number);
+        answer.decimal_point = (int)Math.Max(int.MinValue, Math.Min(int.MaxValue, decimalPoint));
       }
       // In very rare cases, we may have fewer than 19 digits, we want to be able to reliably
       // assume that all digits up to max_digit_without_overflow have been initialized.
@@ -472,7 +474,8 @@ namespace csFastFloat.Structures
         int trailing_zeros = 0;
         while ((*preverse == '0') || (*preverse == decimal_separator))
         {
-          if (*preverse == '0') { trailing_zeros++; };
+          if (*preverse == '0') { trailing_zeros++; }
+          ;
           --preverse;
         }
         answer.decimal_point += (int)(answer.num_digits);

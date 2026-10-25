@@ -1,4 +1,4 @@
-﻿using csFastFloat.Constants;
+using csFastFloat.Constants;
 using csFastFloat.Structures;
 using System;
 using System.Diagnostics;
@@ -16,7 +16,7 @@ namespace csFastFloat
   /// This is a C# port of Daniel Lemire's fast_float library written in C++
   /// https://github.com/fastfloat/fast_float
   /// </summary>
-  public static unsafe class FastDoubleParser
+  public static unsafe partial class FastDoubleParser
   {
 
     private static void ThrowArgumentException() => throw new ArgumentException();
@@ -474,11 +474,16 @@ namespace csFastFloat
       }
       characters_consumed = pns.characters_consumed + leading_spaces;
 
+      value = ConvertNumber(first, last, pns, decimal_separator);
+      return true;
+    }
+
+    private static double ConvertNumber(char* first, char* last, ParsedNumberString pns, char decimal_separator)
+    {
       // Next is Clinger's fast path.
       if (DoubleBinaryConstants.min_exponent_fast_path <= pns.exponent && pns.exponent <= DoubleBinaryConstants.max_exponent_fast_path && pns.mantissa <= DoubleBinaryConstants.max_mantissa_fast_path && !pns.too_many_digits)
       {
-        value = FastPath(pns);
-        return true;
+        return FastPath(pns);
       }
 
       AdjustedMantissa am = ComputeFloat(pns.exponent, pns.mantissa);
@@ -492,8 +497,7 @@ namespace csFastFloat
       // If we called compute_float<binary_format<T>>(pns.exponent, pns.mantissa) and we have an invalid power (am.power2 < 0),
       // then we need to go the long way around again. This is very uncommon.
       if (am.power2 < 0) { am = ParseLongMantissa(first, last, decimal_separator); }
-      value = ToFloat(pns.negative, am);
-      return true;
+      return ToFloat(pns.negative, am);
     }
     /// <summary>
     /// Try to parse the input (UTF-8) and compute the double value
@@ -862,7 +866,7 @@ namespace csFastFloat
           }
         }
       }
-      else if(last - first >= 1)
+      else if (last - first >= 1)
       {
         if (Utils.strncasecmp(first, "∞", 1))
         {

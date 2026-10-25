@@ -1,0 +1,77 @@
+name: Publish NuGet package
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nuget-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Read package version from tag
+      shell: bash
+      run: |
+        PACKAGE_VERSION="${GITHUB_REF_NAME#v}"
+        if [[ ! "$PACKAGE_VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$ ]]; then
+          echo "::error::Use a version tag such as v4.1.6 or v4.1.6-preview.1."
+          exit 1
+        fi
+        echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> "$GITHUB_ENV"
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.0.x
+          9.0.x
+
+    - name: Restore
+      run: dotnet restore SharpFastFloat.sln
+
+    - name: Check formatting
+      run: dotnet format SharpFastFloat.sln --no-restore --verify-no-changes
+
+    - name: Build release
+      run: dotnet build SharpFastFloat.sln --no-restore -c Release -p:Version="$PACKAGE_VERSION" -p:ContinuousIntegrationBuild=true -p:GeneratePackageOnBuild=false
+
+    - name: Test .NET 8
+      run: dotnet test SharpFastFloat.Tests/SharpFastFloat.Tests.csproj --no-build -c Release -f net8.0
+
+    - name: Test .NET 9
+      run: dotnet test SharpFastFloat.Tests/SharpFastFloat.Tests.csproj --no-build -c Release -f net9.0
+
+    - name: Pack
+      run: dotnet pack SharpFastFloat/SharpFastFloat.csproj --no-build -c Release -p:Version="$PACKAGE_VERSION" -p:ContinuousIntegrationBuild=true -p:GeneratePackageOnBuild=false --output artifacts
+
+    - name: Upload release packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: SharpFastFloat-${{ env.PACKAGE_VERSION }}
+        path: artifacts/*.*nupkg
+        if-no-files-found: error
+
+    # Matches the NuGet trusted publisher policy for ModMaker101/SharpFastFloat
+    # and this workflow filename, publish.yml. No stored API key is needed.
+    - name: NuGet trusted publishing login
+      uses: NuGet/login@v1
+      id: login
+      with:
+        user: ModMaker101
+
+    - name: Publish to NuGet.org
+      env:
+        NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+      run: dotnet nuget push "artifacts/SharpFastFloat.$PACKAGE_VERSION.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate

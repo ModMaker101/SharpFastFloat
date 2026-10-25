@@ -374,3 +374,27 @@ measured 20.24 ns before and 20.48 ns after. Short `123` measurements moved by
 less than 0.6 ns in either direction across the four entry points. These are
 short shared-machine runs, not an application-wide throughput claim. ARM64
 correctness is configured in CI; these timings were collected on x64.
+
+## Publishing to NuGet.org
+
+`.github/workflows/publish.yml` uses [NuGet trusted publishing](https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing)
+with GitHub Actions OIDC and `NuGet/login@v1`. No long-lived NuGet API key or GitHub
+secret is required. The policy must match owner `ModMaker101`, repository
+`SharpFastFloat`, workflow filename `publish.yml`, and NuGet user `ModMaker101`.
+The workflow does not use a GitHub Actions environment, matching a policy without
+an environment restriction.
+
+After merging the release changes, tag the intended commit and push the tag:
+
+```sh
+git tag v4.1.6
+git push origin v4.1.6
+```
+
+Use a new version for each release; prerelease tags such as `v4.1.6-preview.1` are
+also supported. The tag supplies the package version, overriding the development
+version in the project file. The workflow restores, checks formatting, builds all
+targets, runs the .NET 8 and .NET 9 test suites, and packs the library before
+requesting a short-lived NuGet key. It publishes the package and associated symbols
+to NuGet.org and retains the package files as GitHub Actions artifacts. Ordinary
+branch pushes and pull requests do not publish packages.

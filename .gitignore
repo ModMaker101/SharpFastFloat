@@ -375,3 +375,7 @@ FodyWeavers.xsd
 
 # Jetbrains Rider
 .idea/
+
+# Generated benchmark and release output
+BenchmarkDotNet.Artifacts/
+/artifacts/

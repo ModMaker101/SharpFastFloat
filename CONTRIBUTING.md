@@ -1,5 +1,14 @@
 # Developing SharpFastFloat
 
+## Repository layout
+
+- `src/SharpFastFloat/`: library source and NuGet project.
+- `tests/SharpFastFloat.Tests/`: tests, approval files, and input datasets.
+- `benchmarks/SharpFastFloat.Benchmarks/`: BenchmarkDotNet benchmarks and datasets.
+- `docs/`: benchmark results and additional documentation.
+
+`SharpFastFloat.sln` at the repository root includes the three projects.
+
 ## Build and test
 
 Use the .NET 9 SDK and install the .NET 8 and .NET 9 runtimes:
@@ -7,8 +16,8 @@ Use the .NET 9 SDK and install the .NET 8 and .NET 9 runtimes:
 ```sh
 dotnet restore SharpFastFloat.sln
 dotnet build SharpFastFloat.sln -c Release
-dotnet test SharpFastFloat.Tests/SharpFastFloat.Tests.csproj -c Release -f net8.0
-dotnet test SharpFastFloat.Tests/SharpFastFloat.Tests.csproj -c Release -f net9.0
+dotnet test tests/SharpFastFloat.Tests/SharpFastFloat.Tests.csproj -c Release -f net8.0
+dotnet test tests/SharpFastFloat.Tests/SharpFastFloat.Tests.csproj -c Release -f net9.0
 ```
 
 The library targets .NET 8, .NET 9, and .NET Standard 2.0. The additional
@@ -30,11 +39,30 @@ fields. CI checks formatting.
 
 ## Benchmarks
 
-The BenchmarkDotNet project includes strict and regular scanning, digit chunks,
-and exact midpoint rounding:
+All benchmarks live in the single BenchmarkDotNet project at
+`benchmarks/SharpFastFloat.Benchmarks/`:
+
+| Suite | Purpose |
+|---|---|
+| `ParsingBenchmarks` | Runtime, regular, and strict APIs, grouped by precision and encoding |
+| `RegularSyntaxBenchmarks` | Grouping and prefix parsing |
+| `MidpointRoundingBenchmark` | Difficult rounding boundaries and zero-tail controls |
+| `DigitChunkBenchmark` | Scalar, four-digit, and eight-digit scanning kernels |
+| `DatasetBenchmarks` | Whole-file parsing of the three checked-in datasets |
+
+Dataset timings measure an entire file per invocation. Input loading and UTF-8
+encoding happen in global setup, outside the timed region. Examples:
+
 
 ```sh
-dotnet run -c Release --project SharpFastFloat.Benchmarks -- --filter '*MidpointRoundingBenchmark*' --job short
+dotnet run -c Release --project benchmarks/SharpFastFloat.Benchmarks -- --filter '*ParsingBenchmarks*' --job short
+```
+
+List suites or run a quick harness check without a full measurement run:
+
+```sh
+dotnet run -c Release --project benchmarks/SharpFastFloat.Benchmarks -- --list flat
+dotnet run -c Release --project benchmarks/SharpFastFloat.Benchmarks -- --filter '*DatasetBenchmarks*' --job dry
 ```
 
 See [measured results and detailed reproduction commands](docs/benchmarks.md).
@@ -51,8 +79,8 @@ NuGet user `ModMaker101`, without an environment restriction.
 After merging the release changes, tag the intended commit and push that tag:
 
 ```sh
-git tag v0.1.0-preview.2
-git push origin v0.1.0-preview.2
+git tag v0.1.0-preview.3
+git push origin v0.1.0-preview.3
 ```
 
 Use a new version for each release. The tag controls the package version. The

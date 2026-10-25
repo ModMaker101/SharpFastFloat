@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using Xunit;
 
-namespace SharpFastFloat.Tests.ff_suppl_tests
+namespace SharpFastFloat.Tests.Supplemental
 {
   public class SupplFilesTest : BaseTestClass
   {
@@ -17,18 +17,7 @@ namespace SharpFastFloat.Tests.ff_suppl_tests
     {
 
 
-      string pathValidation = "data_files";
-
-      if (!Directory.Exists(pathValidation))
-      {
-        // Important: do not assume that path separator is \.
-        pathValidation = "SharpFastFloat.Tests" + Path.PathSeparator + pathValidation;
-        if (!Directory.Exists(pathValidation))
-        {
-          Console.WriteLine("I looked for the data_files directory, and could not find it.");
-          throw new ArgumentException("Invalid search path");
-        }
-      }
+      string pathValidation = Path.Combine(AppContext.BaseDirectory, "Data", "Numbers");
 
       foreach (var fileName in Directory.GetFiles(pathValidation, "*.txt"))
       {

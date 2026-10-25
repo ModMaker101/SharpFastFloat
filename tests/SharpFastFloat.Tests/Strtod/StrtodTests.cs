@@ -6,7 +6,7 @@ using System.IO;
 using System.Text;
 using Xunit;
 
-namespace SharpFastFloat.Tests.suppl_tests
+namespace SharpFastFloat.Tests.Strtod
 {
 
 
@@ -35,7 +35,7 @@ namespace SharpFastFloat.Tests.suppl_tests
 
       StringBuilder sb = new StringBuilder();
 
-      foreach (var fileName in Directory.GetFiles("strtod_tests", "*.txt"))
+      foreach (var fileName in Directory.GetFiles(Path.Combine(AppContext.BaseDirectory, "Data", "Strtod"), "*.txt"))
       {
         Console.WriteLine(fileName);
         var fs = System.IO.File.OpenText(fileName);

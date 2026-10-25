@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 #if HAS_INTRINSICS
 using System.Runtime.Intrinsics;
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using System.Runtime.Intrinsics.Arm;
 #endif
 using System.Runtime.Intrinsics.X86;
@@ -102,7 +102,7 @@ namespace SharpFastFloat
     {
 #if HAS_INTRINSICS
       if (Sse41.IsSupported
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
           || AdvSimd.IsSupported
 #endif
          )
@@ -156,7 +156,7 @@ namespace SharpFastFloat
     internal static int Power(int q)
         => (((152170 + 65536) * q) >> 16) + 63;
 
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static value128 FullMultiplication(ulong value1, ulong value2)
@@ -318,7 +318,7 @@ namespace SharpFastFloat
     internal static bool TryParseEightConsecutiveDigitsSIMD(char* start, out uint value)
     {
 
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
       if (AdvSimd.IsSupported)
       {
         Vector128<ushort> digits = AdvSimd.Subtract(AdvSimd.LoadVector128((ushort*)start), Vector128.Create((ushort)'0'));

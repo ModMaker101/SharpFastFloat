@@ -1,17 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 <PropertyGroup>
-    <TargetFrameworks>net9.0;net8.0;net5.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net9.0;net8.0;netstandard2.0</TargetFrameworks>
     <Authors>ModMaker101;Carl Verret</Authors>
     <PackageId>SharpFastFloat</PackageId>
     <AssemblyName>SharpFastFloat</AssemblyName>
     <RootNamespace>SharpFastFloat</RootNamespace>
-    <Description>A performance-focused fork of csFastFloat, derived from fast_float. Correctly rounded float and double parsing for UTF-16 and UTF-8, with strict decimal APIs and SIMD scanning.</Description>
+    <Description>Fast, correctly rounded float and double parsing for .NET, with UTF-16 and UTF-8 span APIs, strict decimal parsing, SIMD scanning, and exact midpoint rounding.</Description>
     <Copyright>MIT licensed; includes work by the csFastFloat and fast_float authors.</Copyright>
     <PackageProjectUrl>https://github.com/ModMaker101/SharpFastFloat</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ModMaker101/SharpFastFloat</RepositoryUrl>
     <PackageTags>C# Double Float Parsing</PackageTags>
-	  <PackageReadmeFile>readme.md</PackageReadmeFile>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
     <AssemblyVersion>0.1.0.0</AssemblyVersion>
     <FileVersion>0.1.0.0</FileVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -20,7 +20,7 @@
     <LangVersion>9</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>0.1.0-preview.1</Version>
+    <Version>0.1.0-preview.2</Version>
 
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
@@ -45,6 +45,6 @@
     <Compile Remove="Enums\**" />
     <EmbeddedResource Remove="Enums\**" />
     <None Remove="Enums\**" />
-    <None Include="docs\readme.md" Pack="true" PackagePath="\" />
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

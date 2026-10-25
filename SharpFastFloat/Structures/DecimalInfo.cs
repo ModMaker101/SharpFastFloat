@@ -42,7 +42,7 @@ namespace SharpFastFloat.Structures
 
     private static ushort GetNumberOfDigitsDecimalLeftShift(int shift)
     {
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
       Debug.Assert(shift < s_numberOfDigitsDecimalLeftShiftTable.Length);
       ref ushort tableRef = ref MemoryMarshal.GetArrayDataReference(s_numberOfDigitsDecimalLeftShiftTable);
       return Unsafe.Add(ref tableRef, (IntPtr)(uint)shift);

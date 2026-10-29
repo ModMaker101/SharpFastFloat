@@ -4,6 +4,10 @@ These results describe specific SharpFastFloat microbenchmarks, not a universal
 speedup over the .NET runtime. Inputs, hardware, runtime versions, and tradeoffs
 are listed with each measurement.
 
+The suites below have since been consolidated. Commands use the current class
+names and may cover different input sets than the historical runs in the tables.
+For new comparisons, run both revisions with the same harness.
+
 ## Formatting and strict-parser benchmarks
 
 Variable names follow .NET conventions: camelCase locals and parameters,
@@ -25,7 +29,7 @@ intrinsics both enabled and disabled. Run the end-to-end and digit-run benchmark
 (including scalar, four-digit, and eight-digit accumulation) with:
 
 ```sh
-dotnet run -c Release --project SharpFastFloat.Benchmarks -- --filter '*StrictParserBenchmark*' '*DigitChunkBenchmark*' --job short
+dotnet run -c Release --project benchmarks/SharpFastFloat.Benchmarks -- --filter '*ParsingBenchmarks*' '*DigitChunkBenchmark*' --job short
 ```
 
 A short BenchmarkDotNet run on an AMD EPYC 9V74, Debian 13, .NET 9.0.21
@@ -75,7 +79,7 @@ The dedicated benchmark covers short integers, chunk boundaries, long integers,
 grouping, fractions, exponents, and trailing text in all four API paths:
 
 ```sh
-dotnet run -c Release --project SharpFastFloat.Benchmarks -- --filter '*RegularScannerBenchmark*' --job short --warmupCount 3 --iterationCount 5 --iterationTime 100 --launchCount 1
+dotnet run -c Release --project benchmarks/SharpFastFloat.Benchmarks -- --filter '*ParsingBenchmarks*' '*RegularSyntaxBenchmarks*' --job short --warmupCount 3 --iterationCount 5 --iterationTime 100 --launchCount 1
 ```
 
 Before/after means on AMD EPYC 9V74, Debian 13, .NET 9.0.21, using the same harness
@@ -114,7 +118,7 @@ Run the short-input/zero-tail before-and-after harness and the four-entry-point
 comparison (which also includes the configurable parsers) with:
 
 ```sh
-dotnet run -c Release --project SharpFastFloat.Benchmarks -- --filter '*StrictDoubleScannerBenchmark*' '*StrictEntryPointsBenchmark*' --job short --warmupCount 3 --iterationCount 5 --iterationTime 200 --launchCount 1
+dotnet run -c Release --project benchmarks/SharpFastFloat.Benchmarks -- --filter '*MidpointRoundingBenchmark*' '*ParsingBenchmarks*' --job short --warmupCount 3 --iterationCount 5 --iterationTime 200 --launchCount 1
 ```
 
 Measured means on AMD EPYC 9V74, Debian 13, .NET 9.0.21, with scanner commit
@@ -182,7 +186,7 @@ CI includes these tests on x64/ARM64 with intrinsics enabled and disabled.
 Run the midpoint benchmarks with:
 
 ```sh
-dotnet run -c Release --project SharpFastFloat.Benchmarks -- --filter '*MidpointRoundingBenchmark*' --job short --warmupCount 3 --iterationCount 5 --iterationTime 100 --launchCount 1
+dotnet run -c Release --project benchmarks/SharpFastFloat.Benchmarks -- --filter '*MidpointRoundingBenchmark*' --job short --warmupCount 3 --iterationCount 5 --iterationTime 100 --launchCount 1
 ```
 
 Before/after BenchmarkDotNet means on AMD EPYC 9V74, Debian 13, .NET 9.0.21,

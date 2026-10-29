@@ -48,13 +48,13 @@ jobs:
       run: dotnet build SharpFastFloat.sln --no-restore -c Release -p:Version="$PACKAGE_VERSION" -p:ContinuousIntegrationBuild=true -p:GeneratePackageOnBuild=false
 
     - name: Test .NET 8
-      run: dotnet test SharpFastFloat.Tests/SharpFastFloat.Tests.csproj --no-build -c Release -f net8.0
+      run: dotnet test tests/SharpFastFloat.Tests/SharpFastFloat.Tests.csproj --no-build -c Release -f net8.0
 
     - name: Test .NET 9
-      run: dotnet test SharpFastFloat.Tests/SharpFastFloat.Tests.csproj --no-build -c Release -f net9.0
+      run: dotnet test tests/SharpFastFloat.Tests/SharpFastFloat.Tests.csproj --no-build -c Release -f net9.0
 
     - name: Pack
-      run: dotnet pack SharpFastFloat/SharpFastFloat.csproj --no-build -c Release -p:Version="$PACKAGE_VERSION" -p:ContinuousIntegrationBuild=true -p:GeneratePackageOnBuild=false --output artifacts
+      run: dotnet pack src/SharpFastFloat/SharpFastFloat.csproj --no-build -c Release -p:Version="$PACKAGE_VERSION" -p:ContinuousIntegrationBuild=true -p:GeneratePackageOnBuild=false --output artifacts
 
     - name: Upload release packages
       uses: actions/upload-artifact@v4

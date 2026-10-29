@@ -42,7 +42,14 @@ jobs:
       run: dotnet test --no-build --configuration Release --verbosity m
       continue-on-error: false
 
-    - name: Publish packages
+    - name: Smoke benchmark suites
+      run: >-
+        dotnet run -c Release --no-build --project benchmarks/SharpFastFloat.Benchmarks --
+        --filter '*DatasetBenchmarks.StrictUtf16' '*ParsingBenchmarks.StrictDoubleUtf16'
+        '*RegularSyntaxBenchmarks.DoubleUtf16' '*MidpointRoundingBenchmark.DoubleUtf16'
+        '*DigitChunkBenchmark.EightDigits' --job dry
+
+    - name: Upload package artifacts
       uses: actions/upload-artifact@v4
       with:
         name: packages
@@ -62,4 +69,4 @@ jobs:
       with:
         dotnet-version: 9.0.x
     - name: Test decimal scanners with SIMD and scalar paths
-      run: dotnet test SharpFastFloat.Tests/SharpFastFloat.Tests.csproj -f net9.0 -c Release --filter 'FullyQualifiedName~StrictDoubleParserTests|FullyQualifiedName~StrictEntryPointTests|FullyQualifiedName~RegularScannerTests|FullyQualifiedName~ExactMidpointTests|FullyQualifiedName~RoundingIntegerTests'
+      run: dotnet test tests/SharpFastFloat.Tests/SharpFastFloat.Tests.csproj -f net9.0 -c Release --filter 'FullyQualifiedName~StrictDoubleParserTests|FullyQualifiedName~StrictEntryPointTests|FullyQualifiedName~RegularScannerTests|FullyQualifiedName~ExactMidpointTests|FullyQualifiedName~RoundingIntegerTests'

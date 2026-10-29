@@ -6,13 +6,11 @@ using System.Text;
 namespace SharpFastFloat.Benchmarks
 {
   [MemoryDiagnoser]
-  public class RegularScannerBenchmark
+  public class RegularSyntaxBenchmarks
   {
     private byte[] _utf8;
 
-    [Params("1", "123", "1234567", "12345678", "1234567890123456", "1234567890123456789",
-      "123456789012345678901234567890", "123,456,789", "12345678,12345678",
-      "12345678.12345678", "1.2345678901234567e-100", "1234567890123456tail")]
+    [Params("123,456,789", "12345678,12345678", "1234567890123456tail")]
     public string Input { get; set; }
 
     public NumberStyles Styles { get; private set; }
